@@ -1,8 +1,0 @@
-streamlit
-streamlit_extras
-streamlit_echarts
-pyyaml
-pandas 
-matplotlib
-elasticsearch
-torch
