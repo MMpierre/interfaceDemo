@@ -153,13 +153,22 @@ def displayOffers(job_offerings):
 
 
 def app():
-    load_profiles()
-    display_interface()
-    memory.n = random.randint(1,500)
-    load_sidebar()
-    # Call your job matching function and store the results
-    job_offerings = ast.literal_eval(J2Psearch(memory.n,10))
-    displayOffers(job_offerings)
+    if "authorized" not in st.session_state:
+        st.session_state["authorized"] = False
+    
+    if st.session_state["authorized"] == False:
+        userPassword = st.text_input("Rentrez le Mot de Passe","")
+        if userPassword == st.secrets["password"]:
+            st.session_state["authorized"] = True
+    else:
+        load_profiles()
+        display_interface()
+        memory.n = random.randint(1,500)
+        load_sidebar()
+        # Call your job matching function and store the results
+        job_offerings = ast.literal_eval(J2Psearch(memory.n,10))
+        displayOffers(job_offerings)
+
 
         
 
