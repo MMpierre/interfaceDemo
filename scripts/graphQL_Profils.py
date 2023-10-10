@@ -1,8 +1,8 @@
 import requests
 import json
-
+import streamlit as st
 def fetch_profil_data():
-    url = "https://app-dev-wyew76oo4a-ew.a.run.app/graphql?explorerURLState=N4IgJg9gxgrgtgUwHYBcQC4QEcYIE4CeABAKoDO+RwAOkkaRXlbffQJZgusAO+ZESAIYAbACKCUg5nVb0EcQW2HTZsgG4jcXWQF9tRPTMM6QAGhAa8bQQCNhCMhhAgdQA"
+    url = st.secrets["graphQl"]
     headers = {
         "Authorization": "Bearer YOUR_ACCESS_TOKEN",
         "Content-Type": "application/json"
