@@ -69,7 +69,7 @@ def parseOffer(offer:dict):
 def getMissionData(id:str)->dict:
     query = {  "match": {
             "referencenumber": id}}
-    res = memory.es.search(index=memory.config["elastic_search"]["jobIndex"], query=query, source=["id","title","url","city","description","agency_code"])["hits"]["hits"][0]["_source"]
+    res = memory.es.search(index=st.secrets["jobIndex"], query=query, source=["id","title","url","city","description","agency_code"])["hits"]["hits"][0]["_source"]
     return res
 
 def score_to_color(score:str)->str:
