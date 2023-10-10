@@ -158,6 +158,7 @@ def app():
     
     if st.session_state["authorized"] == False:
         userPassword = st.text_input("Rentrez le Mot de Passe","")
+        st.write(userPassword)
         if userPassword == st.secrets["password"]:
             st.session_state["authorized"] = True
     else:
