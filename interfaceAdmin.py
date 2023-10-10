@@ -158,11 +158,9 @@ def app():
     
     if st.session_state["authorized"] == False:
         userPassword = st.text_input("Rentrez le Mot de Passe","")
-        st.write(userPassword)
-        st.write(st.secrets["password"])
-        st.write(userPassword == st.secrets["password"])
         if userPassword == st.secrets["password"]:
             st.session_state["authorized"] = True
+            st.button("Accéder à l'interface")
     else:
         load_profiles()
         display_interface()
