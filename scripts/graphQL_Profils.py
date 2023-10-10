@@ -2,7 +2,7 @@ import requests
 import json
 import streamlit as st
 def fetch_profil_data():
-    url = st.secrets["graphQl"]
+    url = st.secrets["graphQL"]
     headers = {
         "Authorization": "Bearer YOUR_ACCESS_TOKEN",
         "Content-Type": "application/json"
