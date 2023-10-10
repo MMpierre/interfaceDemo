@@ -3,6 +3,7 @@ import elasticsearch
 import yaml
 import pandas as pd
 from .imports.P2J_imports import getProfilVectors,compute_scores
+import streamlit as st
 # Input - ID de la mission
 # Output - ID des profils + scores
 
@@ -19,10 +20,8 @@ SB = 2  # Secondary jobs bonus (%)
 def J2Psearch(id:str,n:int)->pd.DataFrame:
     query = {"match_all": {}}
 
-    config = yaml.safe_load(open("config.yaml", 'r'))
-    es = elasticsearch.Elasticsearch(cloud_id=config["elastic_search"]["cloud_id"], api_key=(config["elastic_search"]["api_key_1"],config["elastic_search"]["api_key_2"]),request_timeout=300)  # 5 minute timeout
-    
-    vecs = getProfilVectors(id,es,config["elastic_search"]["profilIndex"])
+    es =  elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)      
+    vecs = getProfilVectors(id,es,st.secrets["profilIndex"])
 
     res = []
     # filter = {"bool": {
