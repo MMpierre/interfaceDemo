@@ -52,11 +52,7 @@ def load_sidebar():
         for experience in memory.profil["experience"]:
             job.info(experience["title"][0]["value"])
             duration.success(f'Na')
-        colored_header(
-                label="Education",
-                description="",
-                color_name="red-80",)      
-        st.info("BTS") 
+        st.button("Rafraichir les profils")
         
     
 
