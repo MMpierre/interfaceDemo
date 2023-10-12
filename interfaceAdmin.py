@@ -118,19 +118,15 @@ def scoreCard(score,i):
 
 def displayOffers(job_offerings):
     for i,offer in enumerate(job_offerings):
-        with st.form(f"Offre n°{i}"):
-            mission,card = st.columns([5,1])
+        with st.container():
+            data = fetch_mission_data(mission_id=offer["id"])["data"]["missionsProman"]["Mission"][0]  
+            colored_header(data["title"],"","blue-30")
+            mission,card = st.columns([7,1])
             with mission:  
-                data = fetch_mission_data(mission_id=offer["id"])["data"]["missionsProman"]["Mission"][0]  # HARDCODED
-                colored_header(data["title"],"","blue-30")
-                with st.expander("Description",expanded=False):
-                    st.markdown(data["description"][0]["value"],unsafe_allow_html=True)
-
-                # ville,agence,url = st.columns([2,2,1])
-                # ville.info(data["city"])
-                # agence.info(data["agency_code"])  
-                st.link_button("URL Proman",data["url"][0]["value"])
-                st.form_submit_button("Test")
+                desc,url = st.columns([9,1])
+                with desc.expander("Description",expanded=False):
+                    st.markdown(data["description"][0]["value"],unsafe_allow_html=True) 
+                url.link_button("URL Proman",data["url"][0]["value"])
             with card:
                 score = 100 * (offer["score"]-70) / 25
                 scoreCard(score,i)
