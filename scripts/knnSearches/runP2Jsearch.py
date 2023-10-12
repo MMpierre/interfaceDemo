@@ -34,7 +34,7 @@ def P2Jsearch(id:str,n:int)->pd.DataFrame:
     #                     {"range": { "educationLevel": {
     #                                   "lte" : EDUCATION}} }]} }
     for vec in vecs:
-        knn = {"field": "vectorTest",
+        knn = {"field": "vector",
                 "query_vector": vec,
                 "k": 50,
                 "num_candidates": 50}

@@ -121,7 +121,7 @@ def displayOffers(job_offerings):
         with st.form(f"Offre n°{i}"):
             mission,card = st.columns([5,1])
             with mission:  
-                data = fetch_mission_data(mission_id="pm:MP352113-2023-10-10")["data"]["missionsProman"]["Mission"][0]  # HARDCODED
+                data = fetch_mission_data(mission_id=offer["id"])["data"]["missionsProman"]["Mission"][0]  # HARDCODED
                 colored_header(data["title"],"","blue-30")
                 with st.expander("Description",expanded=False):
                     st.markdown(data["description"][0]["value"],unsafe_allow_html=True)
