@@ -23,11 +23,7 @@ def load_profiles():
 
 def display_interface():
     st.selectbox("Profil",memory.profiles,0,label_visibility="hidden",format_func=lambda x : x["personalData"][0]["family"][0]["value"],key="profil")
-    try:
-        st.header(f'Offres Personnalisées pour {memory.profil["personalData"][0]["family"][0]["value"]}',divider="red")
-    except:
-        st.error("Aucun profil complet n'est disponible")
-
+    st.header(f'Offres Personnalisées pour {memory.profil["personalData"][0]["family"][0]["value"]}',divider="red")
 def load_sidebar():
     st.sidebar.title("Interface Administrateur")
     st.sidebar.image("ressources/logoMM.png")
@@ -146,17 +142,21 @@ def app():
             st.session_state["authorized"] = True
             st.button("Accéder à l'interface")
     else:
-        load_profiles()
-        display_interface()
-        memory.n = random.randint(1,500)
-        load_sidebar()
-        # Call your job matching function and store the results
         try:
-            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10))  
-            displayOffers(job_offerings) 
-        except:
-            st.error("Le profil n'est pas présent dans la base de données")
+            load_profiles()
+            display_interface()
+            memory.n = random.randint(1,500)
+            load_sidebar()
+        
 
+            # Call your job matching function and store the results
+            try:
+                job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10))  
+                displayOffers(job_offerings) 
+            except:
+                st.error("Le profil n'est pas présent dans la base de données")
+        except:
+            st.error("Aucun profil complet n'est disponible")
 
         
 
