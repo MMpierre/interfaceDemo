@@ -148,8 +148,11 @@ def app():
         memory.n = random.randint(1,500)
         load_sidebar()
         # Call your job matching function and store the results
-        job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10))  
-        displayOffers(job_offerings) 
+        try:
+            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10))  
+            displayOffers(job_offerings) 
+        except:
+            st.error("Le profil n'est pas présent dans la base de données")
 
 
         
