@@ -23,7 +23,10 @@ def load_profiles():
 
 def display_interface():
     st.selectbox("Profil",memory.profiles,0,label_visibility="hidden",format_func=lambda x : x["personalData"][0]["family"][0]["value"],key="profil")
-    st.header(f'Offres Personnalisées pour {memory.profil["personalData"][0]["family"][0]["value"]}',divider="red")
+    try:
+        st.header(f'Offres Personnalisées pour {memory.profil["personalData"][0]["family"][0]["value"]}',divider="red")
+    except:
+        st.error("Aucun profil complet n'est disponible")
 
 def load_sidebar():
     st.sidebar.title("Interface Administrateur")
