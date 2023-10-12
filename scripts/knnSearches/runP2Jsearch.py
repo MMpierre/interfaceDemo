@@ -1,6 +1,5 @@
 import argparse
 import elasticsearch
-import yaml
 import pandas as pd
 from .imports.P2J_imports import getProfilVectors,compute_scores
 import streamlit as st
@@ -17,7 +16,7 @@ SB = 2  # Secondary jobs bonus (%)
 
 
 
-def J2Psearch(id:str,n:int)->pd.DataFrame:
+def P2Jsearch(id:str,n:int)->pd.DataFrame:
     query = {"match_all": {}}
 
     es =  elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)      
@@ -35,7 +34,7 @@ def J2Psearch(id:str,n:int)->pd.DataFrame:
     #                     {"range": { "educationLevel": {
     #                                   "lte" : EDUCATION}} }]} }
     for vec in vecs:
-        knn = {"field": f"vector",
+        knn = {"field": "vectorTest",
                 "query_vector": vec,
                 "k": 50,
                 "num_candidates": 50}
@@ -48,5 +47,5 @@ if __name__ == "__main__":
     parser.add_argument("n", type=int, help="The number of profiles to return")
     args = parser.parse_args()
 
-    print(J2Psearch(args.id,args.n))
+    print(P2Jsearch("mirrored/" + args.id,args.n))
 

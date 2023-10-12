@@ -3,28 +3,27 @@ import streamlit as st
 import json
 
 def fetch_mission_data(mission_id):
-    url = st.secrets["graphQL"]
+    url = "https://app-dev-wyew76oo4a-ew.a.run.app/graphql"
 
     query = """
-    query User($missionsPromanId: [ID]) {
-      missionsProman(id: $missionsPromanId) {
-        Mission {
-          id
-          title {
-            ... on String_xsd {
-              value
+            query User($missionsPromanId: [ID]) {
+              missionsProman(id: $missionsPromanId) {
+                Mission {
+                  id
+                  title {
+                    ... on String_xsd {
+                      value
+                    }
+                  }
+                  url {
+                    value
+                  }
+                  description {
+                    value
+                  }
+                }
+              }
             }
-          }
-          description {
-            value
-          }
-          }
-          url {
-            value
-          }
-        }
-      }
-    }
     """
 
     variables = {
@@ -38,9 +37,9 @@ def fetch_mission_data(mission_id):
 
     if response.status_code == 200:
         data = response.json()
-        print(json.dumps(data, indent=4))
+        return(data)
     else:
-        print(f"Query failed with status code {response.status_code}")
+        print(f"Query failed with status code {response.text}")
 
 if __name__ == "__main__":
     mission_id = input("Enter the Mission ID: ")

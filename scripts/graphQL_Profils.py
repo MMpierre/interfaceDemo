@@ -3,27 +3,30 @@ import json
 import streamlit as st
 def fetch_profil_data():
     url = st.secrets["graphQL"]
-    headers = {
-        "Authorization": "Bearer YOUR_ACCESS_TOKEN",
-        "Content-Type": "application/json"
-    }
 
     query = """query User {
-        User{
-          personalData {
-            email {
-              value
-            }
-          }
-          experience {
-            title {
-              ... on String_xsd {
-                value
+                User {
+                  id
+                  personalData {
+                    email {
+                      value
+                    }
+                    family {
+                      value
+                    }
+                  }
+                  experience {
+                    title {
+                      ... on String_xsd {
+                        value
+                      }
+                    }
+                    duration {
+                      value
+                    }
+                  }
+                }
               }
-            }
-          }
-        }
-      }
     """
 
     response = requests.post(
