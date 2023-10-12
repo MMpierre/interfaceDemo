@@ -18,7 +18,8 @@ memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key
 
 ######################################### AFFICHAGE ##############################################################
 def load_profiles():
-    memory.profiles = [profil for profil in fetch_profil_data()["data"]["User"] if len(profil["personalData"])>0 and len(profil["personalData"][0]["family"])>0]
+    with st.spinner("Récupération des profils"):
+        memory.profiles = [profil for profil in fetch_profil_data()["data"]["User"] if len(profil["personalData"])>0 and len(profil["personalData"][0]["family"])>0]
 
 
 def display_interface():
@@ -154,7 +155,7 @@ def app():
                 job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10))  
                 displayOffers(job_offerings) 
             except:
-                st.error("Le profil n'est pas présent dans la base de données")
+                st.error("Le profil n'est pas présent sur ElasticSearch")
         except:
             st.error("Aucun profil complet n'est disponible")
 
