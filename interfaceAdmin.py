@@ -8,6 +8,7 @@ from scripts.graphQL_Profils import fetch_profil_data
 from scripts.graphQL_Jobs import fetch_mission_data
 from streamlit_echarts import st_echarts
 import random
+from stqdm import stqdm
 ######################################### CONFIGURATION ##############################################################
 
 #shorten session state method
@@ -19,23 +20,17 @@ memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key
 ######################################### AFFICHAGE ##############################################################
 def load_profiles():
     with st.spinner("Récupération des profils"):
-        memory.profiles = [profil for profil in fetch_profil_data()["data"]["User"] if len(profil["personalData"])>0 and len(profil["personalData"][0]["family"])>0]
+        memory.profiles = [profil for profil in stqdm(fetch_profil_data()["data"]["User"],"Recupération des profils")]
 
 
-def display_interface():
-    st.selectbox("Profil",memory.profiles,0,label_visibility="hidden",format_func=lambda x : x["personalData"][0]["family"][0]["value"],key="profil")
-    st.header(f'Offres Personnalisées pour {memory.profil["personalData"][0]["family"][0]["value"]}',divider="red")
-def load_sidebar():
+def displayProfile():
+    
+    st.selectbox("Profil",memory.profiles,0,label_visibility="hidden",format_func=lambda x : x["id"],key="profil")
+
+    st.header(f'Offres Personnalisées pour {memory.profil["id"]}',divider="red")
     st.sidebar.title("Interface Administrateur")
     st.sidebar.image("ressources/logoMM.png")
     with st.sidebar:
-        colored_header(
-                    label="Profil",
-                    description="",
-                    color_name="red-80",)
-        st.info(memory.profil["personalData"][0]["family"][0]["value"])
-        if len(memory.profil["personalData"][0]["email"])>0:
-            st.info(memory.profil["personalData"][0]["email"][0]["value"])
         colored_header(
                 label="Expérience",
                 description="",
@@ -143,21 +138,16 @@ def app():
             st.session_state["authorized"] = True
             st.button("Accéder à l'interface")
     else:
-        try:
-            load_profiles()
-            display_interface()
-            memory.n = random.randint(1,500)
-            load_sidebar()
-        
+        load_profiles()
+        displayProfile()
+    
 
-            # Call your job matching function and store the results
-            try:
-                job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10))  
-                displayOffers(job_offerings) 
-            except:
-                st.error("Le profil n'est pas présent sur ElasticSearch")
+        # Call your job matching function and store the results
+        try:
+            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10))  
+            displayOffers(job_offerings) 
         except:
-            st.error("Aucun profil complet n'est disponible")
+            st.error("Le profil n'est pas présent sur ElasticSearch")
 
         
 
