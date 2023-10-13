@@ -8,7 +8,6 @@ from scripts.graphQL_Profils import fetch_profil_data
 from scripts.graphQL_Jobs import fetch_mission_data
 from streamlit_echarts import st_echarts
 import random
-from stqdm import stqdm
 ######################################### CONFIGURATION ##############################################################
 
 #shorten session state method
@@ -20,7 +19,7 @@ memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key
 ######################################### AFFICHAGE ##############################################################
 def load_profiles():
     with st.spinner("Récupération des profils"):
-        memory.profiles = [profil for profil in stqdm(fetch_profil_data()["data"]["User"],"Recupération des profils")]
+        memory.profiles = [profil for profil in fetch_profil_data()["data"]["User"]]
 
 
 def displayProfile():
