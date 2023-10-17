@@ -26,7 +26,6 @@ def load_profiles():
 def displayProfile():
     st.selectbox("Profil",memory.profiles,3,label_visibility="hidden",format_func=lambda x :x["personalData"][0]["given"][0]["value"].capitalize() +" " +  x["personalData"][0]["family"][0]["value"].capitalize(),key="profil")
     st.title(f'Offres Personnalisées pour {memory.profil["personalData"][0]["given"][0]["value"].capitalize() +" " +  memory.profil["personalData"][0]["family"][0]["value"].capitalize()}')
-    st.write(memory.profil["id"])
     st.sidebar.title("Interface Administrateur")
     st.sidebar.image("ressources/logoMM.png")
     with st.sidebar:
