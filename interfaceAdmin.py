@@ -23,8 +23,8 @@ def load_profiles():
 
 
 def displayProfile():
-    st.selectbox("Profil",memory.profiles,0,label_visibility="hidden",format_func=lambda x :x["personalData"][0]["given"][0]["value"].capitalize() +" " +  x["personalData"][0]["family"][0]["value"].capitalize(),key="profil")
-    st.header(f'Offres Personnalisées pour {memory.profil["personalData"][0]["family"][0]["value"]}',divider="red")
+    st.selectbox("Profil",memory.profiles,3,label_visibility="hidden",format_func=lambda x :x["personalData"][0]["given"][0]["value"].capitalize() +" " +  x["personalData"][0]["family"][0]["value"].capitalize(),key="profil")
+    st.title(f'Offres Personnalisées pour {memory.profil["personalData"][0]["given"][0]["value"].capitalize() +" " +  memory.profil["personalData"][0]["family"][0]["value"].capitalize()}')
     st.sidebar.title("Interface Administrateur")
     st.sidebar.image("ressources/logoMM.png")
     with st.sidebar:
@@ -107,23 +107,29 @@ def scoreCard(score,i):
             {
             "value": str(score)[:4]
             }]}]}
-    st_echarts(options=options,height="200px",key=str(i)+"chart")
+    st_echarts(options=options,height="150px",key=str(i)+"chart")
 
 def displayOffers(job_offerings):
     for i,offer in enumerate(job_offerings):
         with st.container():
-            data = fetch_mission_data(mission_id=offer["id"])["data"]["missionsProman"]["Mission"][0]  
-            colored_header(f"Mission #{i} : " + str(data["title"]),"","blue-30")
+            data = fetch_mission_data(mission_id=offer["id"])["_source"]
+            score = 100 * (offer["score"]-72.25) / 25
+            if score > 70:
+                colored_header(data["title__value"],"","green-50")
+            elif score > 65:
+                colored_header(data["title__value"],"","orange-50")
+            else:
+                colored_header(data["title__value"],"","red-50")
+
             mission,card = st.columns([7,1])
             with mission:  
                 desc,url = st.columns([9,1])
                 with desc.expander("Description",expanded=False):
-                    st.markdown(data["description"][0]["value"],unsafe_allow_html=True) 
+                    st.markdown(data["description__value"],unsafe_allow_html=True) 
                     desc.info("Adresse de la mission")
-                url.link_button("URL Proman",data["url"][0]["value"])
-                url.info("Agence de la mission")
+                url.link_button("URL Proman",data["url__value"])
+                url.info(data["member_of"][0][7:])
             with card:
-                score = 100 * (offer["score"]-70) / 25
                 scoreCard(score,i)
 
 
