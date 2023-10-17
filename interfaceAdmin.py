@@ -20,6 +20,8 @@ memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key
 def load_profiles():
     with st.spinner("Récupération des profils"):
         memory.profiles = [profil for profil in fetch_profil_data()["data"]["User"] if len(profil["personalData"])>0 and len(profil["personalData"][0]["family"])>0]
+        filtered_out = ["76c073a7-3ed8-444e-95ce-a238cfb4a44d","users/LoImF2RDvtI0JXuskGP8-"]
+        memory.profiles = [profil for profil in memory.profiles if profil["id"] not in filtered_out]
 
 
 def displayProfile():
@@ -110,7 +112,25 @@ def scoreCard(score,i):
     st_echarts(options=options,height="150px",key=str(i)+"chart")
 
 def displayOffers(job_offerings):
+    b = next((idx for idx, item in enumerate(job_offerings) if 100 * (item["score"]-72.25) / 25 < 70), None)
+
+    # Find the index where the "score" goes below 65
+    c = next((idx for idx, item in enumerate(job_offerings) if 100 * (item["score"]-72.25) / 25 < 65), None)
+
+    # Create the tuple (a, b, c)
+    seuil = (0, b, c)
     for i,offer in enumerate(job_offerings):
+
+        if i == seuil[0]:
+            with st.expander("Seuil de confiance 1",expanded=True):
+                st.success("Voici les missions les plus proches des expériences rapportées par le client.")
+        if i == seuil[1]:
+            with st.expander("Seuil de confiance 2",expanded=True):
+                st.warning("En dessous de ce seuil, les offres sont moins proches et sont plus des possiblités de transition proches de l'expérience client")
+        elif i == seuil[2]:
+            with st.expander("Seuil de confiance 3",expanded=True):
+                st.error("Enfin les offres ci-dessous sont trop éloignées pour pouvoir faire un rapprochement avec le client. Elle ne seront pas affichées de son côté.")
+
         with st.container():
             data = fetch_mission_data(mission_id=offer["id"])["_source"]
             score = 100 * (offer["score"]-72.25) / 25
