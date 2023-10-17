@@ -14,6 +14,9 @@ def fetch_profil_data():
                     family {
                       value
                     }
+                    given {
+                      value
+                    }
                   }
                   experience {
                     title {

@@ -39,6 +39,7 @@ def P2Jsearch(id:str,n:int)->pd.DataFrame:
                 "k": 50,
                 "num_candidates": 50}
         res += es.search(index=st.secrets["jobIndex"], query=query, source=["id"], knn = knn,size=50)["hits"]["hits"]
+        
     return compute_scores(res,n)
 
 if __name__ == "__main__":

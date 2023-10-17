@@ -19,17 +19,20 @@ memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key
 ######################################### AFFICHAGE ##############################################################
 def load_profiles():
     with st.spinner("Récupération des profils"):
-        memory.profiles = [profil for profil in fetch_profil_data()["data"]["User"]]
+        memory.profiles = [profil for profil in fetch_profil_data()["data"]["User"] if len(profil["personalData"])>0 and len(profil["personalData"][0]["family"])>0]
 
 
 def displayProfile():
-    
-    st.selectbox("Profil",memory.profiles,0,label_visibility="hidden",format_func=lambda x : x["id"],key="profil")
-
-    st.header(f'Offres Personnalisées pour {memory.profil["id"]}',divider="red")
+    st.selectbox("Profil",memory.profiles,0,label_visibility="hidden",format_func=lambda x :x["personalData"][0]["given"][0]["value"].capitalize() +" " +  x["personalData"][0]["family"][0]["value"].capitalize(),key="profil")
+    st.header(f'Offres Personnalisées pour {memory.profil["personalData"][0]["family"][0]["value"]}',divider="red")
     st.sidebar.title("Interface Administrateur")
     st.sidebar.image("ressources/logoMM.png")
     with st.sidebar:
+        colored_header(
+                label="Profil",
+                description="",
+                color_name="red-80",)
+        st.info(memory.profil["personalData"][0]["email"][0]["value"])
         colored_header(
                 label="Expérience",
                 description="",
@@ -44,10 +47,6 @@ def displayProfile():
     
 
 # MATCHING ##############################################################
-
-def parseOffer(offer:dict):
-    options = [offer["city"],offer["education"],offer["experience"]]
-    return options
 
 
 def score_to_color(score:str)->str:
@@ -114,7 +113,7 @@ def displayOffers(job_offerings):
     for i,offer in enumerate(job_offerings):
         with st.container():
             data = fetch_mission_data(mission_id=offer["id"])["data"]["missionsProman"]["Mission"][0]  
-            colored_header(f"Mission #{i} : " + data["title"],"","blue-30")
+            colored_header(f"Mission #{i} : " + str(data["title"]),"","blue-30")
             mission,card = st.columns([7,1])
             with mission:  
                 desc,url = st.columns([9,1])
@@ -142,13 +141,8 @@ def app():
         load_profiles()
         displayProfile()
     
-
-        # Call your job matching function and store the results
-        try:
-            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10))  
-            displayOffers(job_offerings) 
-        except:
-            st.error("Le profil n'est pas présent sur ElasticSearch")
+        job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10))  
+        displayOffers(job_offerings) 
 
         
 
