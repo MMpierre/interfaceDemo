@@ -1,6 +1,7 @@
 import requests
 import json
 import streamlit as st
+@st.cache_data(ttl=3600*24)
 def fetch_profil_data():
     url = st.secrets["graphQL"]
 
@@ -33,7 +34,7 @@ def fetch_profil_data():
     """
     variables = {
     "pagination": {
-        "limit": 50
+        "limit": 150
        }
     }
     response = requests.post(
