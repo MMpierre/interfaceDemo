@@ -23,3 +23,4 @@ def compute_scores(l:list,n:int)->pd.DataFrame:
     df = pd.DataFrame(l)
     df["_score"] *= 50
     return outputFormat(df.sort_values('_score',ascending=False).drop_duplicates(["_id"])[:n])
+
