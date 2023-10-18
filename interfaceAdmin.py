@@ -149,7 +149,8 @@ def displayOffers(job_offerings):
                 url.link_button("URL Proman",data["url__value"])
                 url.info(data["member_of"][0][7:])
             with card:
-                scoreCard(score,i)
+                # scoreCard(score,i)
+                st.metric("Score",f"{(score // 0.1)/10} %")
 
 
 
