@@ -128,7 +128,7 @@ def displayOffers(job_offerings):
                 st.warning("En dessous de ce seuil, les offres sont moins proches et sont plus des possiblités de transition proches de l'expérience client")
         elif i == seuil[2]:
             with st.expander("Seuil de confiance 3",expanded=True):
-                st.error("Enfin les offres ci-dessous sont encore plus éloignées mais peuvent néanmoins être intéressante à échanger avec client")
+                st.error("Enfin, les offres ci-dessous sont encore plus éloignées mais peuvent néanmoins être intéressantes à discuter avec le client")
 
         with st.container():
             data = fetch_mission_data(mission_id=offer["id"])["_source"]
