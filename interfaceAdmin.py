@@ -20,11 +20,11 @@ memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key
 def load_profiles():
     with st.spinner("Récupération des profils"):
         memory.profiles = [profil for profil in fetch_profil_data()["data"]["User"] if len(profil["personalData"])>0 and len(profil["personalData"][0]["family"])>0]
-        filtered_out = ["76c073a7-3ed8-444e-95ce-a238cfb4a44d","users/LoImF2RDvtI0JXuskGP8-","b5f34a89-3f57-4f51-b268-5c63f72af9b1","4ec49d23-4684-432f-b4a5-23f75e275c82","cb0404b9-fb75-4f40-99e7-82f2b8a21c50","4ef6c923-4330-4242-b06c-c6c55b53558a","user/fXhHv-yTaW","user/BmFAqbOudP"]
+        filtered_out = ["76c073a7-3ed8-444e-95ce-a238cfb4a44d","users/LoImF2RDvtI0JXuskGP8-","b5f34a89-3f57-4f51-b268-5c63f72af9b1","4ec49d23-4684-432f-b4a5-23f75e275c82","cb0404b9-fb75-4f40-99e7-82f2b8a21c50","4ef6c923-4330-4242-b06c-c6c55b53558a","user/fXhHv-yTaW","user/BmFAqbOudP","d828a000-4af9-4746-9304-aa6c9f0537fc"]
         memory.profiles = [profil for profil in memory.profiles if profil["id"] not in filtered_out and profil["personalData"][0]["family"][0]["value"] != "Doe" and profil["personalData"][0]["family"][0]["value"] != "Doe2"]
 
 def displayProfile():
-    st.selectbox("Profil",memory.profiles,3,label_visibility="hidden",format_func=lambda x :x["personalData"][0]["given"][0]["value"].capitalize() +" " +  x["personalData"][0]["family"][0]["value"].capitalize(),key="profil")
+    st.selectbox("Profil",memory.profiles,5,label_visibility="hidden",format_func=lambda x :x["personalData"][0]["given"][0]["value"].capitalize() +" " +  x["personalData"][0]["family"][0]["value"].capitalize(),key="profil")
     st.title(f'Offres Personnalisées pour {memory.profil["personalData"][0]["given"][0]["value"].capitalize() +" " +  memory.profil["personalData"][0]["family"][0]["value"].capitalize()}')
     st.sidebar.title("Interface Administrateur")
     st.sidebar.image("ressources/logoMM.png")
