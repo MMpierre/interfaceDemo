@@ -20,7 +20,7 @@ memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key
 def load_profiles():
     with st.spinner("Récupération des profils"):
         memory.profiles = [profil for profil in fetch_profil_data()["data"]["User"] if len(profil["personalData"])>0 and len(profil["personalData"][0]["family"])>0]
-        filtered_out = ["76c073a7-3ed8-444e-95ce-a238cfb4a44d","users/LoImF2RDvtI0JXuskGP8-","b5f34a89-3f57-4f51-b268-5c63f72af9b1","4ec49d23-4684-432f-b4a5-23f75e275c82","cb0404b9-fb75-4f40-99e7-82f2b8a21c50","4ef6c923-4330-4242-b06c-c6c55b53558a","user/fXhHv-yTaW","user/BmFAqbOudP","d828a000-4af9-4746-9304-aa6c9f0537fc"]
+        filtered_out = ["76c073a7-3ed8-444e-95ce-a238cfb4a44d","users/LoImF2RDvtI0JXuskGP8-","b5f34a89-3f57-4f51-b268-5c63f72af9b1","4ec49d23-4684-432f-b4a5-23f75e275c82","cb0404b9-fb75-4f40-99e7-82f2b8a21c50","4ef6c923-4330-4242-b06c-c6c55b53558a","user/fXhHv-yTaW","user/BmFAqbOudP","f425ee70-f4da-4228-b8c0-91b627cea860"]
         memory.profiles = [profil for profil in memory.profiles if profil["id"] not in filtered_out and profil["personalData"][0]["family"][0]["value"] != "Doe" and profil["personalData"][0]["family"][0]["value"] != "Doe2"]
 
 def displayProfile():
@@ -38,8 +38,8 @@ def displayProfile():
                 label="Expérience",
                 description="",
                 color_name="red-80",)
-        job,duration = st.columns([4,1])
         for experience in memory.profil["experience"]:
+            job,duration = st.columns([4,1])
             if len(experience["title"])>0:
                 job.info(experience["title"][0]["value"])
                 duration.success(experience["duration"][0]["value"])
@@ -145,9 +145,15 @@ def displayOffers(job_offerings):
                 desc,url = st.columns([9,1])
                 with desc.expander("Description",expanded=False):
                     st.markdown(data["description__value"],unsafe_allow_html=True) 
-                    desc.info("Adresse de la mission")
                 url.link_button("URL Proman",data["url__value"])
-                url.info(data["member_of"][0][7:])
+                ad,w,l,ag = st.columns([3,3,3,1])
+                ad.info(data["address__city__0"].capitalize() + ", " + data["address__postalcode__0"])
+                w.info(data["contract__workTime"])
+                if "contract__contractLengthValue" and "contract__contractLengthUnit" in data.keys():
+                    l.info(data["contract__contractLengthValue"]+ " " + data["contract__contractLengthUnit"])
+                else:
+                    l.info("Non précisé")
+                ag.info(data["agency"][0][7:])
             with card:
                 # scoreCard(score,i)
                 st.metric("Score",f"{(score // 0.1)/10} %")

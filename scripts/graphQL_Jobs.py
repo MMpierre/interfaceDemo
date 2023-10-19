@@ -47,7 +47,7 @@ def fetch_mission_data(mission_id):
 
     query = {  "match": {
             "_id": mission_id}}
-    res = es.search(index=st.secrets["jobIndex"], query=query, source=["title__value","description__value","member_of","url__value",])["hits"]["hits"][0]
+    res = es.search(index=st.secrets["jobIndex"], query=query, source_excludes=["vector"])["hits"]["hits"][0]
     return res
 
 if __name__ == "__main__":
