@@ -34,6 +34,10 @@ def displayProfile():
                 description="",
                 color_name="red-80",)
         st.info(memory.profil["personalData"][0]["email"][0]["value"])
+        if len(memory.profil["personalData"][0]["location"][0]["geolocation"])>0:
+            st.info(memory.profil["personalData"][0]["location"][0]["city"][0]["value"])
+        else:
+            st.info("Pas encore d'adresse")
         colored_header(
                 label="Expérience",
                 description="",
@@ -172,8 +176,12 @@ def app():
     else:
         load_profiles()
         displayProfile()
-    
-        job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10))  
+        if len(memory.profil["personalData"][0]["location"][0]["geolocation"])>0:
+            # job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,geo=memory.profil["personalData"][0]["location"][0]["geolocation"][0]["value"].split(","),distance=memory.profil["personalData"][0]["preferredDistance"][0]["value"])) 
+            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,None,None))   
+        else:
+            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,None,None))  
+
         displayOffers(job_offerings) 
 
         

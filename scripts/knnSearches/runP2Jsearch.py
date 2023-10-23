@@ -16,29 +16,31 @@ SB = 2  # Secondary jobs bonus (%)
 
 
 
-def P2Jsearch(id:str,n:int)->pd.DataFrame:
+def P2Jsearch(id:str,n:int,geo:tuple,distance:int)->pd.DataFrame:
     query = {"match_all": {}}
 
     es =  elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)      
     vecs = getProfilVectors(id,es,st.secrets["profilIndex"])
-
+    print(geo)
     res = []
-    # filter = {"bool": {
-    #                 "must": [
-    #                     {"geo_distance": { "distance": DISTANCEMAX+"km",
-    #                                  "location": {
-    #                                         "lon": LONGITUDE,
-    #                                         "lat": LATTITUDE }    }},  
-    #                     {"range": { "experienceMinimum": {
-    #                                  "lt": EXPERIENCE } }},
-    #                     {"range": { "educationLevel": {
-    #                                   "lte" : EDUCATION}} }]} }
     for vec in vecs:
         knn = {"field": "vector",
                 "query_vector": vec,
                 "k": 50,
                 "num_candidates": 50}
-        res += es.search(index=st.secrets["jobIndex"], query=query, source=["id"], knn = knn,size=50)["hits"]["hits"]
+        if geo:
+            filter = {"bool": {
+                        "must": [
+                            {"geo_distance": { "distance": distance,
+                                                "geolocation": {
+                                                        "lon": geo[0],
+                                                        "lat": geo[1] }}}
+                                                        ]}}
+            print(filter)
+            res += es.search(index=st.secrets["jobIndex"], query=query, source=["id"],post_filter=filter, knn = knn,size=50)["hits"]["hits"]
+        else:
+            res += es.search(index=st.secrets["jobIndex"], query=query, source=["id"], knn = knn,size=50)["hits"]["hits"]
+
         
     return compute_scores(res,n)
 
