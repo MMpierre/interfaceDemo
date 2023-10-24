@@ -114,7 +114,8 @@ def scoreCard(score,i):
             }]}]}
     st_echarts(options=options,height="150px",key=str(i)+"chart")
 
-def displayOffers(job_offerings):
+def displayOffers(job_offerings,stats):
+    st.write(stats)
     b = next((idx for idx, item in enumerate(job_offerings) if 100 * (item["score"]-72.25) / 25 < 70), None)
 
     # Find the index where the "score" goes below 65
@@ -136,6 +137,7 @@ def displayOffers(job_offerings):
 
         with st.container():
             data = fetch_mission_data(mission_id=offer["id"])["_source"]
+
             score = 100 * (offer["score"]-72.25) / 25
             if score > 70:
                 colored_header(data["title__value"],"","green-50")
@@ -172,7 +174,7 @@ def app():
         userPassword = st.text_input("Rentrez le Mot de Passe","")
         if userPassword == st.secrets["password"]:
             st.session_state["authorized"] = True
-            st.button("Accéder à l'interface")
+            st.experimental_rerun()
     else:
         load_profiles()
         displayProfile()
@@ -180,9 +182,10 @@ def app():
             # job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,geo=memory.profil["personalData"][0]["location"][0]["geolocation"][0]["value"].split(","),distance=memory.profil["personalData"][0]["preferredDistance"][0]["value"])) 
             job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None))   
         else:
-            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None))  
+            job_offerings_str,stats = P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None)
+            job_offerings = ast.literal_eval(job_offerings_str)
 
-        displayOffers(job_offerings) 
+        displayOffers(job_offerings,stats) 
 
         
 

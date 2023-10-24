@@ -17,7 +17,6 @@ SB = 2  # Secondary jobs bonus (%)
 
 
 def P2Jsearch(id:str,n:int,expected:int,geo:tuple,distance:int)->pd.DataFrame:
-    query = {"match_all": {}}
 
     es =  elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)      
     vecs = getProfilVectors(id,es,st.secrets["profilIndex"])
@@ -26,12 +25,42 @@ def P2Jsearch(id:str,n:int,expected:int,geo:tuple,distance:int)->pd.DataFrame:
             st.warning(f'Attention ! nous avons récupéré uniquement {len(vecs)} vecteur(s) pour {expected} expériences')
         
 
-        res = []
+        hits = []
+        aggs = []
         for vec in vecs:
+            query = {"match_all": {}}
             knn = {"field": "vector",
                     "query_vector": vec,
                     "k": 50,
                     "num_candidates": 50}
+            aggregations = {
+                            "member_of_count": {
+                            "terms": {
+                                "field": "member_of.keyword"
+                                }
+                            },
+                            "job_count_by_agency": {
+                                "terms": {
+                                    "field": "member_of.keyword"
+                                }
+                            },
+                            "job_count_by_sector": {
+                                "terms": {
+                                    "field": "sector.keyword"
+                                }
+                            },
+                            "types_of_contracts": {
+                                "terms": {
+                                    "field": "contract.keyword"
+                                }
+                            },
+                            "job_count_by_area": {
+                                "terms": {
+                                    "field": "area.keyword"
+                                }
+                            }
+                        }
+
             if geo:
                 filter = {"bool": {
                             "must": [
@@ -40,13 +69,17 @@ def P2Jsearch(id:str,n:int,expected:int,geo:tuple,distance:int)->pd.DataFrame:
                                                             "lon": geo[0],
                                                             "lat": geo[1] }}}
                                                             ]}}
-                print(filter)
-                res += es.search(index=st.secrets["jobIndex"], query=query, source=["id"],post_filter=filter, knn = knn,size=50)["hits"]["hits"]
+                
+                res = es.search(index=st.secrets["jobIndex"], query=query, source=["id"],post_filter=filter, knn = knn,size=50)["hits"]["hits"]
             else:
-                res += es.search(index=st.secrets["jobIndex"], query=query, source=["id"], knn = knn,size=50)["hits"]["hits"]
+                res = es.search(index=st.secrets["jobIndex"], query=query, source=["id"], knn = knn,size=50,aggregations=aggregations)
+                hits += res["hits"]["hits"]
+                print('\n\n')
+                print(res["aggregations"])
+                print('\n\n')
+                aggs += res["aggregations"]
 
-            
-        return compute_scores(res,n)
+        return compute_scores(hits,n),aggs
     else:
         st.error("Pas de vecteur pour ce profil sur ElasticSearch")
         return("[]")
