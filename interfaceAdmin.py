@@ -178,9 +178,9 @@ def app():
         displayProfile()
         if len(memory.profil["personalData"][0]["location"][0]["geolocation"])>0:
             # job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,geo=memory.profil["personalData"][0]["location"][0]["geolocation"][0]["value"].split(","),distance=memory.profil["personalData"][0]["preferredDistance"][0]["value"])) 
-            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,None,None))   
+            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None))   
         else:
-            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,None,None))  
+            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None))  
 
         displayOffers(job_offerings) 
 

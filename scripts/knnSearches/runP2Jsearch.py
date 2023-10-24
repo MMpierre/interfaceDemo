@@ -16,34 +16,42 @@ SB = 2  # Secondary jobs bonus (%)
 
 
 
-def P2Jsearch(id:str,n:int,geo:tuple,distance:int)->pd.DataFrame:
+def P2Jsearch(id:str,n:int,expected:int,geo:tuple,distance:int)->pd.DataFrame:
     query = {"match_all": {}}
 
     es =  elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)      
     vecs = getProfilVectors(id,es,st.secrets["profilIndex"])
-    print(geo)
-    res = []
-    for vec in vecs:
-        knn = {"field": "vector",
-                "query_vector": vec,
-                "k": 50,
-                "num_candidates": 50}
-        if geo:
-            filter = {"bool": {
-                        "must": [
-                            {"geo_distance": { "distance": distance,
-                                                "geolocation": {
-                                                        "lon": geo[0],
-                                                        "lat": geo[1] }}}
-                                                        ]}}
-            print(filter)
-            res += es.search(index=st.secrets["jobIndex"], query=query, source=["id"],post_filter=filter, knn = knn,size=50)["hits"]["hits"]
-        else:
-            res += es.search(index=st.secrets["jobIndex"], query=query, source=["id"], knn = knn,size=50)["hits"]["hits"]
-
+    if len(vecs)>0:
+        if len(vecs)<expected:
+            st.warning(f'Attention ! nous avons récupéré uniquement {len(vecs)} vecteur(s) pour {expected} expériences')
         
-    return compute_scores(res,n)
 
+        res = []
+        for vec in vecs:
+            knn = {"field": "vector",
+                    "query_vector": vec,
+                    "k": 50,
+                    "num_candidates": 50}
+            if geo:
+                filter = {"bool": {
+                            "must": [
+                                {"geo_distance": { "distance": distance,
+                                                    "geolocation": {
+                                                            "lon": geo[0],
+                                                            "lat": geo[1] }}}
+                                                            ]}}
+                print(filter)
+                res += es.search(index=st.secrets["jobIndex"], query=query, source=["id"],post_filter=filter, knn = knn,size=50)["hits"]["hits"]
+            else:
+                res += es.search(index=st.secrets["jobIndex"], query=query, source=["id"], knn = knn,size=50)["hits"]["hits"]
+
+            
+        return compute_scores(res,n)
+    else:
+        st.error("Pas de vecteur pour ce profil sur ElasticSearch")
+        return("[]")
+
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="A script that takes an argument.")
     parser.add_argument("id", type=str, help="The id of the profile")

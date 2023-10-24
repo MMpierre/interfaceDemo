@@ -1,7 +1,7 @@
 import requests
 import json
 import streamlit as st
-@st.cache_data(ttl=3600*24)
+@st.cache_data(ttl=3600)
 def fetch_profil_data():
     url = st.secrets["graphQL"]
 
