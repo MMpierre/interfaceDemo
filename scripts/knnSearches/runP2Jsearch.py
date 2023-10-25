@@ -15,7 +15,6 @@ SB = 2  # Secondary jobs bonus (%)
 
 
 
-
 def P2Jsearch(id:str,n:int,expected:int,geo:tuple,distance:int)->pd.DataFrame:
 
     es =  elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)      

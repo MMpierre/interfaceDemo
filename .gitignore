@@ -1,0 +1,8 @@
+# Ignore secrets file
+secrets.toml
+
+# Ignore Python cache directories and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/

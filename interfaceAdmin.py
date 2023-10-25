@@ -4,7 +4,7 @@ import ast
 import matplotlib.pyplot as plt
 import elasticsearch
 from scripts.knnSearches.runP2Jsearch import P2Jsearch
-from scripts.graphQL_Profils import fetch_profil_data
+from scripts.graphQL_Profils import fetch_names_ids,fetch_data_by_id
 from scripts.graphQL_Jobs import fetch_mission_data
 from streamlit_echarts import st_echarts
 import random
@@ -19,13 +19,12 @@ memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key
 ######################################### AFFICHAGE ##############################################################
 def load_profiles():
     with st.spinner("Récupération des profils"):
-        memory.profiles = [profil for profil in fetch_profil_data()["data"]["User"] if len(profil["personalData"])>0 and len(profil["personalData"][0]["family"])>0]
-        filtered_out = ["76c073a7-3ed8-444e-95ce-a238cfb4a44d","users/LoImF2RDvtI0JXuskGP8-","b5f34a89-3f57-4f51-b268-5c63f72af9b1","4ec49d23-4684-432f-b4a5-23f75e275c82","cb0404b9-fb75-4f40-99e7-82f2b8a21c50","4ef6c923-4330-4242-b06c-c6c55b53558a","user/fXhHv-yTaW","user/BmFAqbOudP","d828a000-4af9-4746-9304-aa6c9f0537fc"]
-        memory.profiles = [profil for profil in memory.profiles if profil["id"] not in filtered_out and profil["personalData"][0]["family"][0]["value"] != "Doe" and profil["personalData"][0]["family"][0]["value"] != "Doe2"]
+        memory.ids,memory.names = fetch_names_ids()
 
 def displayProfile():
-    st.selectbox("Profil",memory.profiles,5,label_visibility="hidden",format_func=lambda x :x["personalData"][0]["given"][0]["value"].capitalize() +" " +  x["personalData"][0]["family"][0]["value"].capitalize(),key="profil")
-    st.title(f'Offres Personnalisées pour {memory.profil["personalData"][0]["given"][0]["value"].capitalize() +" " +  memory.profil["personalData"][0]["family"][0]["value"].capitalize()}')
+    st.selectbox("Profil",memory.ids,0,label_visibility="hidden",format_func=lambda x :memory.names[memory.ids.index(x)],key="id")
+    
+    st.title(f"Offres Personnalisées pour {memory.names[memory.ids.index(memory.profil['id'])]}")
     st.sidebar.title("Interface Administrateur")
     st.sidebar.image("ressources/logoMM.png")
     with st.sidebar:
@@ -33,20 +32,26 @@ def displayProfile():
                 label="Profil",
                 description="",
                 color_name="red-80",)
-        st.info(memory.profil["personalData"][0]["email"][0]["value"])
-        if len(memory.profil["personalData"][0]["location"][0]["geolocation"])>0:
+        try:
+            st.info(memory.profil["personalData"][0]["email"][0]["value"])
+        except:
+            st.info("Pas d'adresse email")
+        try:
             st.info(memory.profil["personalData"][0]["location"][0]["city"][0]["value"])
-        else:
-            st.info("Pas encore d'adresse")
+        except:
+            st.info("Pas d'adresse")
         colored_header(
                 label="Expérience",
                 description="",
                 color_name="red-80",)
-        for experience in memory.profil["experience"]:
-            job,duration = st.columns([4,1])
-            if len(experience["title"])>0:
-                job.info(experience["title"][0]["value"])
-                duration.success(experience["duration"][0]["value"])
+        try:
+            for experience in memory.profil["experience"]:
+                job,duration = st.columns([4,1])
+                if len(experience["title"])>0:
+                    job.info(experience["title"][0]["value"])
+                    duration.success(experience["duration"][0]["value"])
+        except:
+            st.warning("Pas d'expérience")
         st.button("Rafraichir les profils")
         
     
@@ -174,7 +179,7 @@ def app():
         userPassword = st.text_input("Rentrez le Mot de Passe","")
         if userPassword == st.secrets["password"]:
             st.session_state["authorized"] = True
-            st.experimental_rerun()
+            st.rerun()
     else:
         load_profiles()
         displayProfile()
