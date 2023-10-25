@@ -182,7 +182,7 @@ def displayOffers(job_offerings):
                 try:
                     ag.info(data["agency"][0][7:])
                 except:
-                    ag.info("Agence non précisée")
+                    ag.info("404")
 
             with card:
                 # scoreCard(score,i)
