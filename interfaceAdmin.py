@@ -18,9 +18,9 @@ memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key
 
 ######################################### AFFICHAGE ##############################################################
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=600)
 def load_profiles():
-    memory.profiles = fetch_profiles(memory.es)
+    return fetch_profiles(memory.es)
 
 def displayName(user):
     try:
@@ -29,6 +29,7 @@ def displayName(user):
         return user["id"]
 
 def displayProfile():
+    memory.profiles = load_profiles()
     st.selectbox("Profil",memory.profiles,5,label_visibility="hidden",format_func=lambda x: displayName(x) ,key="profil")
     try:
         st.title(f'Offres Personnalisées pour {memory.profil["personalData"][0]["given"][0]["value"].capitalize()  + " " + memory.profil["personalData"][0]["family"][0]["value"].capitalize()}')
