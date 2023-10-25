@@ -1,8 +1,6 @@
 import requests
-from tqdm import tqdm
 import streamlit as st
 
-st.cache_data(ttl=3600)
 def fetch_names_ids():
     url = st.secrets["graphQL"]
     id_query = """query User($pagination: paginationInput) {
@@ -32,16 +30,16 @@ def fetch_names_ids():
         data = response.json()
         
         for user in data["data"]["User"]:
-            all_ids.append(user["id"])
             name = ""
             if len(user["personalData"])>0:
                 if user["personalData"][0]["family"]:
-                    name += user["personalData"][0]["family"][0]["value"]
+                    name += user["personalData"][0]["family"][0]["value"].capitalize()
                 name += " " 
                 if  user["personalData"][0]["given"]:
-                    name += user["personalData"][0]["given"][0]["value"]
-    
-            all_names.append(name) 
+                    name += user["personalData"][0]["given"][0]["value"].capitalize()
+            if len(name)>5:
+                all_names.append(name) 
+                all_ids.append(user["id"])
 
         if len(data["data"]["User"]) < limit:
             break

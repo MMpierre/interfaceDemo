@@ -46,15 +46,14 @@ def displayProfile():
                 label="Expérience",
                 description="",
                 color_name="red-80",)
-        try:
+        if memory.profil["experience"]:
             for experience in memory.profil["experience"]:
                 job,duration = st.columns([4,1])
                 if len(experience["title"])>0:
                     job.info(experience["title"][0]["value"])
                     duration.success(experience["duration"][0]["value"])
-        except:
+        else:
             st.warning("Pas d'expérience")
-        st.button("Rafraichir les profils")
         
     
 
