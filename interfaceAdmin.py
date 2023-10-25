@@ -17,13 +17,15 @@ memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key
 
 
 ######################################### AFFICHAGE ##############################################################
+
+@st.cache_data(ttl=3600)
 def load_profiles():
     with st.spinner("Récupération des profils"):
         memory.ids,memory.names = fetch_names_ids()
 
 def displayProfile():
-    st.selectbox("Profil",memory.ids,0,label_visibility="hidden",format_func=lambda x :memory.names[memory.ids.index(x)],key="id")
-    
+    st.selectbox("Profil",memory.ids,0,label_visibility="hidden",format_func=lambda x :memory.names[memory.ids.index(x)],key="id",)
+    memory.profil= fetch_data_by_id(memory.id)["data"]["User"][0]
     st.title(f"Offres Personnalisées pour {memory.names[memory.ids.index(memory.profil['id'])]}")
     st.sidebar.title("Interface Administrateur")
     st.sidebar.image("ressources/logoMM.png")
@@ -119,8 +121,8 @@ def scoreCard(score,i):
             }]}]}
     st_echarts(options=options,height="150px",key=str(i)+"chart")
 
-def displayOffers(job_offerings,stats):
-    st.write(stats)
+def displayOffers(job_offerings):
+    
     b = next((idx for idx, item in enumerate(job_offerings) if 100 * (item["score"]-72.25) / 25 < 70), None)
 
     # Find the index where the "score" goes below 65
@@ -187,10 +189,9 @@ def app():
             # job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,geo=memory.profil["personalData"][0]["location"][0]["geolocation"][0]["value"].split(","),distance=memory.profil["personalData"][0]["preferredDistance"][0]["value"])) 
             job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None))   
         else:
-            job_offerings_str,stats = P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None)
-            job_offerings = ast.literal_eval(job_offerings_str)
+            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None))
 
-        displayOffers(job_offerings,stats) 
+        displayOffers(job_offerings) 
 
         
 
