@@ -179,7 +179,11 @@ def displayOffers(job_offerings):
                     l.info(data["contract__contractLengthValue"]+ " " + data["contract__contractLengthUnit"])
                 except:
                     l.info("Durée contrat non précisée")
-                ag.info(data["agency"][0][7:])
+                try:
+                    ag.info(data["agency"][0][7:])
+                except:
+                    ag.info("Agence non précisée")
+
             with card:
                 # scoreCard(score,i)
                 st.metric("Score",f"{(score // 0.1)/10} %")
