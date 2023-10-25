@@ -1,52 +1,37 @@
 import requests
 import streamlit as st
+from elasticsearch import Elasticsearch
 
-def fetch_names_ids():
-    url = st.secrets["graphQL"]
-    id_query = """query User($pagination: paginationInput) {
-                     User(pagination: $pagination) {
-                               id
-                               personalData {
-                                   family { value }
-                                   given { value }
-                                   }
-                     }
-                 }"""
+def fetch_profiles(es)->list:
+    ids = fetch_all_ids(es)
+    data = [fetch_data_by_id(id) for id in ids]
+    return data
 
-    all_ids = []
-    all_names = []
-    limit = 10
-    page = 1
+def fetch_all_ids(es):
+    # Initial search
+    query = {
+            "bool": {
+                "filter": {
+                    "exists": {
+                        "field": "experience__occupation__vector__0"
+                    }
+                }
+            }
+        }
+    
+    res = es.search(index=st.secrets["profilIndex"],size=100,source=["_id"], query=query,scroll='1m')
+    scroll_id = res['_scroll_id']
+    scroll_size = len(res['hits']['hits'])
+    
+    all_ids = [profile["_id"][9:] for profile in res["hits"]["hits"]]
+    # Continue scrolling until no more results
+    while scroll_size > 0:
+        res = es.scroll(scroll_id=scroll_id, scroll='1m')
+        all_ids.extend([profile["_id"] for profile in res["hits"]["hits"]])
+        scroll_size = len(res['hits']['hits'])
+    
+    return all_ids
 
-    while True:
-        
-        variables = {"pagination": {"limit": limit, "page": page}}
-        response = requests.post(url, json={"query": id_query, "variables": variables})
-
-        if response.status_code != 200:
-            print(f"Query failed with status code {response.status_code}")
-            break
-
-        data = response.json()
-        
-        for user in data["data"]["User"]:
-            name = ""
-            if len(user["personalData"])>0:
-                if user["personalData"][0]["family"]:
-                    name += user["personalData"][0]["family"][0]["value"].capitalize()
-                name += " " 
-                if  user["personalData"][0]["given"]:
-                    name += user["personalData"][0]["given"][0]["value"].capitalize()
-            if len(name)>5:
-                all_names.append(name) 
-                all_ids.append(user["id"])
-
-        if len(data["data"]["User"]) < limit:
-            break
-
-        page += 1
-
-    return all_ids,all_names
 
 
 def fetch_data_by_id(user_id:str):
@@ -81,11 +66,11 @@ def fetch_data_by_id(user_id:str):
 
     if response.status_code == 200:
         data = response.json()
-        return data
+        return data["data"]["User"][0]
     else:
         print(f"Query failed with status code {response.text}")
 
 
 if __name__ == "__main__":
-    print(fetch_all_ids())
+    print(fetch_profiles(Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300) ))
 

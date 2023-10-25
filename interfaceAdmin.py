@@ -4,7 +4,7 @@ import ast
 import matplotlib.pyplot as plt
 import elasticsearch
 from scripts.knnSearches.runP2Jsearch import P2Jsearch
-from scripts.graphQL_Profils import fetch_names_ids,fetch_data_by_id
+from scripts.graphQL_Profils import fetch_profiles
 from scripts.graphQL_Jobs import fetch_mission_data
 from streamlit_echarts import st_echarts
 import random
@@ -20,13 +20,20 @@ memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key
 
 @st.cache_data(ttl=3600)
 def load_profiles():
-    with st.spinner("Récupération des profils"):
-        memory.ids,memory.names = fetch_names_ids()
+    memory.profiles = fetch_profiles(memory.es)
+
+def displayName(user):
+    try:
+        return user["personalData"][0]["given"][0]["value"].capitalize() + " " + user["personalData"][0]["family"][0]["value"].capitalize() 
+    except:
+        return user["id"]
 
 def displayProfile():
-    st.selectbox("Profil",memory.ids,0,label_visibility="hidden",format_func=lambda x :memory.names[memory.ids.index(x)],key="id",)
-    memory.profil= fetch_data_by_id(memory.id)["data"]["User"][0]
-    st.title(f"Offres Personnalisées pour {memory.names[memory.ids.index(memory.profil['id'])]}")
+    st.selectbox("Profil",memory.profiles,5,label_visibility="hidden",format_func=lambda x: displayName(x) ,key="profil")
+    try:
+        st.title(f'Offres Personnalisées pour {memory.profil["personalData"][0]["given"][0]["value"].capitalize()  + " " + memory.profil["personalData"][0]["family"][0]["value"].capitalize()}')
+    except:
+        st.title(f'Offres Personnalisées pour {memory.profil["id"]} (Pas de nom)')
     st.sidebar.title("Interface Administrateur")
     st.sidebar.image("ressources/logoMM.png")
     with st.sidebar:
