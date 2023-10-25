@@ -167,12 +167,18 @@ def displayOffers(job_offerings):
                     st.markdown(data["description__value"],unsafe_allow_html=True) 
                 url.link_button("URL Proman",data["url__value"])
                 ad,w,l,ag = st.columns([3,3,3,1])
-                ad.info(data["address__city__0"].capitalize() + ", " + data["address__postalcode__0"])
-                w.info(data["contract__workTime"])
-                if "contract__contractLengthValue" and "contract__contractLengthUnit" in data.keys():
+                try:
+                    ad.info(data["address__city__0"].capitalize() + ", " + data["address__postalcode__0"])
+                except:
+                    ad.info("Adresse non précisée")
+                try:
+                    w.info(data["contract__workTime"])
+                except:
+                    w.info("Type de contrat non précisé")
+                try:
                     l.info(data["contract__contractLengthValue"]+ " " + data["contract__contractLengthUnit"])
-                else:
-                    l.info("Non précisé")
+                except:
+                    l.info("Durée contrat non précisée")
                 ag.info(data["agency"][0][7:])
             with card:
                 # scoreCard(score,i)
