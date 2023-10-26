@@ -1,17 +1,13 @@
 import argparse
 import elasticsearch
 import pandas as pd
-from .imports.P2J_imports import getProfilVectors,compute_scores
+from .imports.getProfilVectors import getProfilVectors
+from .imports.computeScore import compute_scores
+from .imports.outputFormat import outputFormat
 import streamlit as st
 # Input - ID de la mission
 # Output - ID des profils + scores
 
-
-####PARAMETERS######
-
-EB = 2  # Experience bonus (%)
-RB = 2  # Recency bonus (%)
-SB = 2  # Secondary jobs bonus (%)
 
 
 
@@ -25,7 +21,6 @@ def P2Jsearch(id:str,n:int,expected:int,geo:tuple,distance:int)->pd.DataFrame:
         
 
         hits = []
-        aggs = []
         for vec in vecs:
             query = {"match_all": {}}
             knn = {"field": "vector",
@@ -36,17 +31,18 @@ def P2Jsearch(id:str,n:int,expected:int,geo:tuple,distance:int)->pd.DataFrame:
                 filter = {"bool": {
                             "must": [
                                 {"geo_distance": { "distance": distance,
-                                                    "geolocation": {
+                                                    "address__geolocation__0": {
                                                             "lon": geo[0],
                                                             "lat": geo[1] }}}
                                                             ]}}
                 
-                res = es.search(index=st.secrets["jobIndex"], query=query, source=["id"],post_filter=filter, knn = knn,size=50)["hits"]["hits"]
+                res = es.search(index=st.secrets["jobIndex"], query=query, source=["id"],post_filter=filter, knn = knn,size=50)
+                hits += res["hits"]["hits"]
             else:
                 res = es.search(index=st.secrets["jobIndex"], query=query, source=["id"], knn = knn,size=50)
                 hits += res["hits"]["hits"]
-
-        return compute_scores(hits,n)
+        score_df = compute_scores(hits,n)
+        return outputFormat(score_df)
     else:
         st.error("Pas de vecteur pour ce profil sur ElasticSearch")
         return("[]")

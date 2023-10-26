@@ -4,8 +4,8 @@ import ast
 import matplotlib.pyplot as plt
 import elasticsearch
 from scripts.knnSearches.runP2Jsearch import P2Jsearch
-from scripts.graphQL_Profils import fetch_profiles
-from scripts.graphQL_Jobs import fetch_mission_data
+from scripts.getProfilData import fetch_profiles
+from scripts.getMissionData import fetch_mission_data
 from streamlit_echarts import st_echarts
 import random
 ######################################### CONFIGURATION ##############################################################
@@ -145,7 +145,7 @@ def displayOffers(job_offerings):
         if i == seuil[1]:
             with st.expander("Seuil de confiance 2",expanded=True):
                 st.warning("En dessous de ce seuil, les offres sont moins proches et sont plus des possiblités de transition proches de l'expérience client")
-        elif i == seuil[2]:
+        if i == seuil[2]:
             with st.expander("Seuil de confiance 3",expanded=True):
                 st.error("Enfin, les offres ci-dessous sont encore plus éloignées mais peuvent néanmoins être intéressantes pour discussion avec le client")
 
@@ -199,12 +199,14 @@ def app():
         if userPassword == st.secrets["password"]:
             st.session_state["authorized"] = True
             st.rerun()
+        elif userPassword != "":
+            st.warning("Mot de passe erroné")
     else:
         load_profiles()
         displayProfile()
         if len(memory.profil["personalData"][0]["location"][0]["geolocation"])>0:
-            # job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,geo=memory.profil["personalData"][0]["location"][0]["geolocation"][0]["value"].split(","),distance=memory.profil["personalData"][0]["preferredDistance"][0]["value"])) 
-            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None))   
+            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),geo=memory.profil["personalData"][0]["location"][0]["geolocation"][0]["value"].split(","),distance=memory.profil["personalData"][0]["preferredDistance"][0]["value"])) 
+            # job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None))   
         else:
             job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None))
 
