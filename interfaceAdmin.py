@@ -152,7 +152,7 @@ def displayOffers(job_offerings):
         with st.container():
             data = fetch_mission_data(mission_id=offer["id"])["_source"]
 
-            score = 100 * (offer["score"]-72.25) / 25
+            score = offer["score"]
             if score > 70:
                 colored_header(data["title__value"],"","green-50")
             elif score > 65:
