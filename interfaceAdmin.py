@@ -18,7 +18,7 @@ memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key
 
 ######################################### AFFICHAGE ##############################################################
 
-@st.cache_data(ttl=600)
+@st.cache_data(ttl=3600)
 def load_profiles():
     return fetch_profiles(memory.es)
 
