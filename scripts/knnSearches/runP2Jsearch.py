@@ -40,6 +40,7 @@ def P2Jsearch(id:str,n:int,expected:int,geo:tuple,distance:int)->pd.DataFrame:
                 res = es.search(index=st.secrets["jobIndex"], query=query, source=["id"],post_filter=filter, knn = knn,size=50)
                 if len(res["hits"]["hits"]) == 0:
                     res = es.search(index=st.secrets["jobIndex"], query=query, source=["id"], knn = knn,size=50)
+                    warning.empty()
                     warning.warning("Pas d'offres dans votre région")
                 hits += res["hits"]["hits"]
             else:

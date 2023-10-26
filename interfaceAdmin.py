@@ -67,67 +67,6 @@ def displayProfile():
 
 # MATCHING ##############################################################
 
-
-def score_to_color(score:str)->str:
-    cmap = plt.get_cmap('RdYlGn')  # Get the colormap in reverse order
-    norm_score = score / 100.0  # Normalize score to range [0,1]
-    rgb = cmap(norm_score)[:3]  # Get RGB values, ignore alpha    
-    rgb = [int(255*val) for val in rgb]  # Convert RGB to 8-bit color (0-255)
-    return '#{:02x}{:02x}{:02x}'.format(*rgb)  # Convert to hexadecimal
-
-def scoreCard(score,i):
-
-    options = {
-    "series": [ {
-        "type": 'gauge',
-        "axisLine": {
-            "lineStyle": {
-            "width": 20,
-            "color": [
-                [0.3, '#b01735'],
-                [0.7, '#f77823'],
-                [1, '#2b8a08']
-            ]
-            }
-        },
-        "pointer": {
-            "itemStyle": {
-            "color": '#000'
-            }
-        },
-        "axisTick": {
-            "distance": -23,
-            "length": 8,
-            "lineStyle": {
-            "color": '#fff',
-            "width": 1
-            }
-        },
-        "splitLine": {
-            "distance": -25,
-            "length": 30,
-            "lineStyle": {
-            "color": '#fff',
-            "width": 2
-            }
-        },
-        "axisLabel": {
-            "color": 'inherit',
-            "distance": -23,
-            "fontSize": 10
-        },
-        "detail": {
-            "valueAnimation": True,
-            "formatter": '{value}%',
-            "color": 'auto',
-            "fontSize": 20
-        },
-        "data": [
-            {
-            "value": str(score)[:4]
-            }]}]}
-    st_echarts(options=options,height="150px",key=str(i)+"chart")
-
 def displayOffers(job_offerings):
     
     b = next((idx for idx, item in enumerate(job_offerings) if item["score"]< 70), None)
