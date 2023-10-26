@@ -130,10 +130,10 @@ def scoreCard(score,i):
 
 def displayOffers(job_offerings):
     
-    b = next((idx for idx, item in enumerate(job_offerings) if 100 * (item["score"]-72.25) / 25 < 70), None)
+    b = next((idx for idx, item in enumerate(job_offerings) if item["score"]< 70), None)
 
     # Find the index where the "score" goes below 65
-    c = next((idx for idx, item in enumerate(job_offerings) if 100 * (item["score"]-72.25) / 25 < 65), None)
+    c = next((idx for idx, item in enumerate(job_offerings) if item["score"]< 65), None)
 
     # Create the tuple (a, b, c)
     seuil = (0, b, c)
