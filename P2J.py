@@ -12,7 +12,6 @@ import random
 
 #shorten session state method
 memory = st.session_state
-st.set_page_config(layout="wide")
 memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)  # 5 minute timeout
 
 
@@ -29,13 +28,13 @@ def displayName(user):
         return user["id"]
 
 def displayProfile():
-    st.selectbox("Profil",memory.profiles,5,label_visibility="hidden",format_func=lambda x: displayName(x) ,key="profil")
+    st.header("Choisissez un profil",divider="red")
+    st.selectbox("Profil",memory.profiles,5,label_visibility="collapsed",format_func=lambda x: displayName(x) ,key="profil")
     try:
         st.title(f'Offres Personnalisées pour {memory.profil["personalData"][0]["given"][0]["value"].capitalize()  + " " + memory.profil["personalData"][0]["family"][0]["value"].capitalize()}')
     except:
         st.title(f'Offres Personnalisées pour {memory.profil["id"]} (Pas de nom)')
-    st.sidebar.title("Interface Administrateur")
-    st.sidebar.image("ressources/logoMM.png")
+
     with st.sidebar:
         colored_header(
                 label="Profil",
@@ -128,29 +127,18 @@ def displayOffers(job_offerings):
 
 
 
-def app():
-    if "authorized" not in st.session_state:
-        st.session_state["authorized"] = False
-    
-    if st.session_state["authorized"] == False:
-        userPassword = st.text_input("Rentrez le Mot de Passe","")
-        if userPassword == st.secrets["password"]:
-            st.session_state["authorized"] = True
-            st.rerun()
-        elif userPassword != "":
-            st.warning("Mot de passe erroné")
+def P2J():
+    memory.profiles = load_profiles()
+    displayProfile()
+    if len(memory.profil["personalData"][0]["location"][0]["geolocation"])>0:
+        job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),geo=memory.profil["personalData"][0]["location"][0]["geolocation"][0]["value"].split(","),distance=memory.profil["personalData"][0]["preferredDistance"][0]["value"])) 
+        # job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None))   
     else:
-        memory.profiles = load_profiles()
-        displayProfile()
-        if len(memory.profil["personalData"][0]["location"][0]["geolocation"])>0:
-            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),geo=memory.profil["personalData"][0]["location"][0]["geolocation"][0]["value"].split(","),distance=memory.profil["personalData"][0]["preferredDistance"][0]["value"])) 
-            # job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None))   
-        else:
-            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None))
+        job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None))
 
-        displayOffers(job_offerings) 
+    displayOffers(job_offerings) 
 
         
 
 if __name__ == "__main__":
-    app()
+    P2J()

@@ -12,7 +12,6 @@ import random
 
 #shorten session state method
 memory = st.session_state
-st.set_page_config(layout="wide")
 memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)  # 5 minute timeout
 
 
@@ -42,14 +41,13 @@ def displayTitle(mission):
         return mission["title__value"] 
        
 def displayMission():
-    st.selectbox("Missions",memory.missions,5,label_visibility="hidden",format_func=lambda x: displayTitle(x),key="mission")
+    st.header("Choisissez une mission",divider="red")
+    st.selectbox("Missions",memory.missions,5,label_visibility="collapsed",format_func=lambda x: displayTitle(x),key="mission")
     memory.data = fetch_mission_data(memory.mission["id"],memory.es)
     with st.expander("Description"):
         st.markdown(memory.data["description__value"],unsafe_allow_html=True)
     st.title(f'Profils Personnalisés pour {memory.mission["title__value"]}')
-    
-    st.sidebar.title("Interface Administrateur")
-    st.sidebar.image("ressources/logoMM.png")
+ 
     with st.sidebar:
         colored_header(
                 label="Mission",
@@ -123,26 +121,15 @@ def displayOffers(profiles):
 
 
 
-def app():
-    if "authorized" not in st.session_state:
-        st.session_state["authorized"] = False
+def J2P():
+    memory.missions = load_missions()
+    displayMission()
+    profiles = ast.literal_eval(J2Psearch(memory.mission["id"],10)) 
     
-    if st.session_state["authorized"] == False:
-        userPassword = st.text_input("Rentrez le Mot de Passe","")
-        if userPassword == st.secrets["password"]:
-            st.session_state["authorized"] = True
-            st.rerun()
-        elif userPassword != "":
-            st.warning("Mot de passe erroné")
-    else:
-        memory.missions = load_missions()
-        displayMission()
-        profiles = ast.literal_eval(J2Psearch(memory.mission["id"],10)) 
-         
 
-        displayOffers(profiles) 
+    displayOffers(profiles) 
 
         
 
 if __name__ == "__main__":
-    app()
+    J2P()
