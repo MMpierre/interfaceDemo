@@ -7,11 +7,7 @@ from scripts.knnSearches.runJ2Psearch import J2Psearch
 from scripts.getProfilData import fetch_data_by_id
 from scripts.getMissionData import fetch_mission_data,fetch_all_missions
 
-import random
-######################################### CONFIGURATION ##############################################################
-
-
-
+memory = st.session_state
 ######################################### AFFICHAGE ##############################################################
 
 @st.cache_data(ttl=3600)

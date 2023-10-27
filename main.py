@@ -2,6 +2,7 @@ import streamlit as st
 st.set_page_config(layout="wide")
 from P2J import P2J
 from J2P import J2P
+memory = st.session_state
 
 def main():
     st.sidebar.title("Interface Administrateur")

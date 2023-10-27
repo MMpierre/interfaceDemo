@@ -7,6 +7,8 @@ from scripts.knnSearches.runP2Jsearch import P2Jsearch
 from scripts.getProfilData import fetch_profiles
 from scripts.getMissionData import fetch_mission_data
 from streamlit_echarts import st_echarts
+#shorten session state method
+memory = st.session_state
 
 ######################################### AFFICHAGE ##############################################################
 
