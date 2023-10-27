@@ -19,7 +19,7 @@ def main():
         elif userPassword != "":
             st.warning("Mot de passe erroné")
     else:           
-        page_selector = st.sidebar.selectbox("Choisissez une page:", ["Interface Profil > Mission",  "Interface Mission > Profil"])
+        page_selector = st.sidebar.selectbox("Choisissez une page:", ["Choisissez une page","Interface Profil > Mission",  "Interface Mission > Profil"],label_visibility="collapsed")
         st.sidebar.divider()
         # Direct to the appropriate page
         if page_selector == "Interface Profil > Mission":
