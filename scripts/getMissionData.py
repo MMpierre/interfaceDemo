@@ -16,7 +16,7 @@ def fetch_all_missions(es):
             }
         }
     
-    res = es.search(index=st.secrets["jobIndex"],size=100,source=["id","title__value"], query=query,scroll='1m')
+    res = es.search(index=st.secrets["jobIndex"],size=100,source=["id","title__value","address__city__0"], query=query,scroll='1m')
     scroll_id = res['_scroll_id']
     scroll_size = len(res['hits']['hits'])
     
@@ -24,7 +24,7 @@ def fetch_all_missions(es):
     # Continue scrolling until no more results
     while scroll_size > 0:
         res = es.scroll(scroll_id=scroll_id, scroll='1m')
-        all_missions.extend([profile["_id"] for profile in res["hits"]["hits"]])
+        all_missions.extend([profile["_source"] for profile in res["hits"]["hits"]])
         scroll_size = len(res['hits']['hits'])
     
     return all_missions

@@ -35,9 +35,14 @@ st.markdown("""
 
     
 ######################################### AFFICHAGE ##############################################################
-
+def displayTitle(mission):
+    try : 
+        return mission["title__value"] + " - " + mission["address__city__0"].capitalize()
+    except:
+        return mission["title__value"] 
+       
 def displayMission():
-    st.selectbox("Missions",memory.missions,5,label_visibility="hidden",format_func=lambda x: x["title__value"] ,key="mission")
+    st.selectbox("Missions",memory.missions,5,label_visibility="hidden",format_func=lambda x: displayTitle(x),key="mission")
     memory.data = fetch_mission_data(memory.mission["id"],memory.es)
     with st.expander("Description"):
         st.markdown(memory.data["description__value"],unsafe_allow_html=True)
