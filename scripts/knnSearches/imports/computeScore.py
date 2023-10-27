@@ -58,6 +58,6 @@ def compute_scores_J2P(l:list,n:int)->pd.DataFrame:
     final_df['customWeight'] += final_df['non_max_sum']
     final_df.drop(columns=['non_max_sum'], inplace=True)
 
-    final_df["_score"] = (final_df["customWeight"] - 1.43)*200
+    final_df["_score"] = final_df["customWeight"] * 50
     final_df.drop("customWeight",axis=1)
     return final_df.sort_values('_score',ascending=False)[:n]
