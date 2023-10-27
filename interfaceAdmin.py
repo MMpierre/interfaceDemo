@@ -88,7 +88,7 @@ def displayOffers(job_offerings):
                 st.error("Enfin, les offres ci-dessous sont encore plus éloignées mais peuvent néanmoins être intéressantes pour discussion avec le client")
 
         with st.container():
-            data = fetch_mission_data(offer["id"],memory.es)["_source"]
+            data = fetch_mission_data(offer["id"],memory.es)
 
             score = offer["score"]
             if score > 70:
