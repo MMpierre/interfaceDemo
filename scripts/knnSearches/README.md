@@ -1,11 +1,18 @@
-# Les deux scripts de "matching":
-- J2P = Job to Profiles
-    - Input : Mission ID, Number of Profiles to return
-    - Output : json list - [{"id" : ID, "score": SCORE}, ...]
-- P2J = Profile to Jobs
-    - Input : Profile ID, Number of Missions to return
-    - Outputs : json list - [{"id": ID, "score": SCORE}, ...]
+# knnSearches
+runP2Jsearch.py
+    > P2Jsearch(id,n,expected,geo,distance)
+    - id of the profil 
+    - n number of results
+    - geo geolocation of the profil, can be None
+    - distance radius of preference of the user, can be None
+imports
+    computeScore.py
+    > compute_scores(l,n)
+    - l list of tuples ("mission_id",score)
+    - n number of results to return
 
-exemple d'appel :
-python 5-minutes-profile-1/services/matchpy/scripts/runJ2Psearch.py "218161-2023-08-11" 10
-python 5-minutes-profile-1/services/matchpy/scripts/runP2Jsearch.py 5 10
+    getProfilVectors.py
+    > getProfilVectors((id,es,index))
+    - id of the profil
+    - es elasticsearch python client
+    - index where the profiles are kept

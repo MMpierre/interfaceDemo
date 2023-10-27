@@ -71,6 +71,7 @@ def fetch_data_by_id(user_id:str):
         print(f"Query failed with status code {response.text}")
 
 
+
 if __name__ == "__main__":
-    print(fetch_profiles(Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300) ))
+        print(fetch_profiles(Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300) ))
 

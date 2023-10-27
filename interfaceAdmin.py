@@ -29,7 +29,6 @@ def displayName(user):
         return user["id"]
 
 def displayProfile():
-    memory.profiles = load_profiles()
     st.selectbox("Profil",memory.profiles,5,label_visibility="hidden",format_func=lambda x: displayName(x) ,key="profil")
     try:
         st.title(f'Offres Personnalisées pour {memory.profil["personalData"][0]["given"][0]["value"].capitalize()  + " " + memory.profil["personalData"][0]["family"][0]["value"].capitalize()}')
@@ -89,7 +88,7 @@ def displayOffers(job_offerings):
                 st.error("Enfin, les offres ci-dessous sont encore plus éloignées mais peuvent néanmoins être intéressantes pour discussion avec le client")
 
         with st.container():
-            data = fetch_mission_data(mission_id=offer["id"])["_source"]
+            data = fetch_mission_data(offer["id"],memory.es)["_source"]
 
             score = offer["score"]
             if score > 70:
@@ -141,7 +140,7 @@ def app():
         elif userPassword != "":
             st.warning("Mot de passe erroné")
     else:
-        load_profiles()
+        memory.profiles = load_profiles()
         displayProfile()
         if len(memory.profil["personalData"][0]["location"][0]["geolocation"])>0:
             job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),geo=memory.profil["personalData"][0]["location"][0]["geolocation"][0]["value"].split(","),distance=memory.profil["personalData"][0]["preferredDistance"][0]["value"])) 

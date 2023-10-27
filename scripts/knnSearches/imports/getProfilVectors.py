@@ -1,7 +1,7 @@
 import elasticsearch
 import torch
 
-def getProfilVectors(id:str,es:elasticsearch.Elasticsearch,index:str)->torch.Tensor:
+def getProfilVectors(id:str,es:elasticsearch.Elasticsearch,index:str):
     query = {  "match": {
             "_id": id}}
     res = es.search(index=index, query=query, source=[f"experience__occupation__vector__{i}" for i in range(10)])["hits"]["hits"]
