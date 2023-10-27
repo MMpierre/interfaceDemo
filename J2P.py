@@ -62,34 +62,17 @@ def displayName(user):
     except:
         return user["id"]
     
-def displayOffers(profiles):
+def displayProfiles(profiles):
     
-    b = next((idx for idx, item in enumerate(profiles) if item["score"]< 70), None)
-
-    # Find the index where the "score" goes below 65
-    c = next((idx for idx, item in enumerate(profiles) if item["score"]< 65), None)
-
-    # Create the tuple (a, b, c)
-    seuil = (0, b, c)
     for i,profil in enumerate(profiles):
-
-        if i == seuil[0]:
-            with st.expander("Seuil de confiance 1",expanded=True):
-                st.success("Voici les missions les plus proches des expériences rapportées par le client.")
-        if i == seuil[1]:
-            with st.expander("Seuil de confiance 2",expanded=True):
-                st.warning("En dessous de ce seuil, les offres sont moins proches et sont plus des possiblités de transition proches de l'expérience client")
-        if i == seuil[2]:
-            with st.expander("Seuil de confiance 3",expanded=True):
-                st.error("Enfin, les offres ci-dessous sont encore plus éloignées mais peuvent néanmoins être intéressantes pour discussion avec le client")
 
         with st.container():
             data = fetch_data_by_id(profil["id"][9:])
 
             score = profil["score"]
-            if score > 70:
+            if score > 80:
                 colored_header(displayName(data),"","green-50")
-            elif score > 65:
+            elif score > 70:
                 colored_header(displayName(data),"","orange-50")
             else:
                 colored_header(displayName(data),"","red-50")
@@ -124,7 +107,7 @@ def J2P():
     profiles = ast.literal_eval(J2Psearch(memory.mission["id"],10)) 
     
 
-    displayOffers(profiles) 
+    displayProfiles(profiles) 
 
         
 
