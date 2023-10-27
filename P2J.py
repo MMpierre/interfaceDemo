@@ -7,13 +7,6 @@ from scripts.knnSearches.runP2Jsearch import P2Jsearch
 from scripts.getProfilData import fetch_profiles
 from scripts.getMissionData import fetch_mission_data
 from streamlit_echarts import st_echarts
-import random
-######################################### CONFIGURATION ##############################################################
-
-#shorten session state method
-memory = st.session_state
-memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)  # 5 minute timeout
-
 
 ######################################### AFFICHAGE ##############################################################
 
@@ -128,6 +121,10 @@ def displayOffers(job_offerings):
 
 
 def P2J():
+    #shorten session state method
+    memory = st.session_state
+    memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)  # 5 minute timeout
+
     memory.profiles = load_profiles()
     displayProfile()
     if len(memory.profil["personalData"][0]["location"][0]["geolocation"])>0:

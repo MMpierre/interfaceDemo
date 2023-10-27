@@ -10,9 +10,6 @@ from scripts.getMissionData import fetch_mission_data,fetch_all_missions
 import random
 ######################################### CONFIGURATION ##############################################################
 
-#shorten session state method
-memory = st.session_state
-memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)  # 5 minute timeout
 
 
 ######################################### AFFICHAGE ##############################################################
@@ -122,6 +119,10 @@ def displayOffers(profiles):
 
 
 def J2P():
+        #shorten session state method
+    memory = st.session_state
+    memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)  # 5 minute timeout
+
     memory.missions = load_missions()
     displayMission()
     profiles = ast.literal_eval(J2Psearch(memory.mission["id"],10)) 
