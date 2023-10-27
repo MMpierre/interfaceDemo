@@ -22,10 +22,10 @@ def fetch_all_missions(es):
     
     all_missions = [profile["_source"] for profile in res["hits"]["hits"]]
     # Continue scrolling until no more results
-    # while scroll_size > 0:
-    #     res = es.scroll(scroll_id=scroll_id, scroll='1m')
-    #     all_missions.extend([profile["_id"] for profile in res["hits"]["hits"]])
-    #     scroll_size = len(res['hits']['hits'])
+    while scroll_size > 0:
+        res = es.scroll(scroll_id=scroll_id, scroll='1m')
+        all_missions.extend([profile["_id"] for profile in res["hits"]["hits"]])
+        scroll_size = len(res['hits']['hits'])
     
     return all_missions
 
