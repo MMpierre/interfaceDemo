@@ -4,7 +4,7 @@ import elasticsearch
 import yaml
 import pandas as pd
 from .imports.getMissionVector import getMissionVector
-from .imports.computeScore import compute_scores_J2P
+from .imports.computeScore import compute_scores
 from .imports.outputFormat import outputFormat
 import json
 import streamlit as st
@@ -38,7 +38,7 @@ def J2Psearch(id:str,n:int)->pd.DataFrame:
                 "k": 50,
                 "num_candidates": 50}
         res += es.search(index=st.secrets["profilIndex"], query=query, source=["id"], knn = knn,size=50)["hits"]["hits"]
-    scores = compute_scores_J2P(res,n)
+    scores = compute_scores(res,n)
     return outputFormat(scores)
 
 if __name__ == "__main__":

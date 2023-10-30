@@ -2,7 +2,7 @@ import argparse
 import elasticsearch
 import pandas as pd
 from .imports.getProfilVectors import getProfilVectors
-from .imports.computeScore import compute_scores_P2J
+from .imports.computeScore import compute_scores
 from .imports.outputFormat import outputFormat
 import streamlit as st
 # Input - ID de la mission
@@ -47,7 +47,7 @@ def P2Jsearch(id:str,n:int,expected:int,geo:tuple,distance:int)->pd.DataFrame:
             else:
                 res = es.search(index=st.secrets["jobIndex"], query=query, source=["id"], knn = knn,size=50)
                 hits += res["hits"]["hits"]
-        score_df = compute_scores_P2J(hits,n)
+        score_df = compute_scores(hits,n)
         return outputFormat(score_df)
     else:
         st.error("Pas de vecteur pour ce profil sur ElasticSearch")

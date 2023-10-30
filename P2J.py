@@ -55,6 +55,13 @@ def displayProfile():
                     duration.success(experience["duration"][0]["value"])
         else:
             st.warning("Pas d'expérience")
+        if len(memory.profil["favoriteMissions"])>0:
+            colored_header("Mission likées","","red-70")
+            with st.sidebar.expander("Liste"):
+                for mission in memory.profil["favoriteMissions"]:
+                    l,r = st.columns([4,1])
+                    l.info(mission["title"][0]["value"])
+                    r.link_button("🌎",url=mission["url"][0]["value"],use_container_width=True)
         
     
 
@@ -83,7 +90,7 @@ def displayOffers(job_offerings):
 
         with st.container():
             data = fetch_mission_data(offer["id"],memory.es)
-
+            
             score = offer["score"]
             if score > 70:
                 colored_header(data["title__value"],"","green-50")
@@ -117,8 +124,11 @@ def displayOffers(job_offerings):
                     ag.info("404")
 
             with card:
-                # scoreCard(score,i)
-                st.metric("Score",f"{(score // 0.1)/10} %")
+                st.metric("Score",f"{(score // 0.1)/10} %",label_visibility='collapsed')
+                if len(memory.profil["favoriteMissions"])>0:
+                    for fmission in memory.profil["favoriteMissions"]:
+                        if fmission["id"] == offer["id"]:
+                            st.success("Missions likée")
 
 
 

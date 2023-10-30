@@ -50,7 +50,15 @@ def fetch_data_by_id(user_id:str):
                                    }
                                    preferredDistance { value }
                                }
-                               favoriteMissions { id }
+                               favoriteMissions {
+                                    id
+                                    title {
+                                        value
+                                    }
+                                    url {
+                                        value
+                                    }
+                                }
                                experience {
                                    title {
                                        ... on String_xsd { value }

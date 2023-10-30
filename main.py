@@ -8,26 +8,39 @@ def main():
     st.sidebar.title("Interface Administrateur")
     st.sidebar.image("ressources/logoMM.png")
     # Create a page selector
-    if "authorized" not in st.session_state:
-            st.session_state["authorized"] = False
+    if "authorized" not in memory:
+            memory["authorized"] = False
+            memory.page = ''
         
-    if st.session_state["authorized"] == False:
+    if memory["authorized"] == False:
         userPassword = st.text_input("Rentrez le Mot de Passe","")
         if userPassword == st.secrets["password"]:
-            st.session_state["authorized"] = True
+            memory["authorized"] = True
             st.rerun()
         elif userPassword != "":
             st.warning("Mot de passe erroné")
     else:           
-        page_selector = st.sidebar.selectbox("Choisissez une page:", ["Choisissez une page","Interface Profil > Mission",  "Interface Mission > Profil"],label_visibility="collapsed")
+        l,r = st.sidebar.columns(2)
+        if l.button("Profil > Mission",use_container_width=True) : memory.page = "Interface Profil > Mission"
+        if r.button("Mission > Profil",use_container_width=True) : memory.page = "Interface Mission > Profil"
+        with st.sidebar.expander("Scoring"),st.form("scoring"):
+            st.header("Paramètre scoring",divider="red")
+            st.slider("Scaling",0,10,5,1,key="SC")
+            st.slider("Secondary Job Bonus",0.0,4.0,2.0,0.5,key='SB')
+            st.slider("Experience Bonus",0.0,4.0,2.0,0.5,key="EB",disabled=True)
+            st.slider("Liked Mission Bonus",0.0,4.0,2.0,0.5,key="LMB",disabled=True)
+            st.form_submit_button("Recalculer",use_container_width=True)
         st.sidebar.divider()
         # Direct to the appropriate page
-        if page_selector == "Interface Profil > Mission":
+        if memory.page == "Interface Profil > Mission":
             P2J()
-        elif page_selector == "Interface Mission > Profil":
+        elif memory.page == "Interface Mission > Profil":
             J2P()
 
 
+def init_parameters(SC=5,EB=2,SB=2,LMB=2):
+    memory.SC,memory.EB,memory.SB,memory.LMB = SC,EB,SB,LMB
+    
     
        
 if __name__ == "__main__":
