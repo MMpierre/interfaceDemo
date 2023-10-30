@@ -23,7 +23,7 @@ def main():
         l,r = st.sidebar.columns(2)
         if l.button("Profil > Mission",use_container_width=True) : memory.page = "Interface Profil > Mission"
         if r.button("Mission > Profil",use_container_width=True) : memory.page = "Interface Mission > Profil"
-        with st.sidebar.expander("Scoring"),st.form("scoring"):
+        with st.sidebar.expander("Scoring",expanded=False),st.form("scoring"):
             st.header("Paramètre scoring",divider="red")
             st.slider("Scaling",0,10,7,1,key="SC")
             st.slider("Secondary Job Bonus",0.0,4.0,2.0,0.5,key='SB')
