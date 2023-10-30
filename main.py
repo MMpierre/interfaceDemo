@@ -25,7 +25,7 @@ def main():
         if r.button("Mission > Profil",use_container_width=True) : memory.page = "Interface Mission > Profil"
         with st.sidebar.expander("Scoring"),st.form("scoring"):
             st.header("Paramètre scoring",divider="red")
-            st.slider("Scaling",0,10,5,1,key="SC")
+            st.slider("Scaling",0,10,7,1,key="SC")
             st.slider("Secondary Job Bonus",0.0,4.0,2.0,0.5,key='SB')
             st.slider("Experience Bonus",0.0,4.0,2.0,0.5,key="EB",disabled=True)
             st.slider("Liked Mission Bonus",0.0,4.0,2.0,0.5,key="LMB",disabled=True)
