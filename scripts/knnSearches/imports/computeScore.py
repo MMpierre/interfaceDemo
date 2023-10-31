@@ -28,8 +28,6 @@ def compute_scores(l:list,n:int)->pd.DataFrame:
     # Drop the original '_score' column if needed
     final_df.drop(columns=['_score'], inplace=True)
     final_df.fillna(1,inplace=True)
-    # Step 3: Concatenate all processed groups
-    final_df = pd.concat(processed_groups).reset_index(drop=True)
 
     final_df["_score"] = computeBonus(final_df[["_score1","_score2","_score3"]],SB)
 

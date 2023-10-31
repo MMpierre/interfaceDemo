@@ -35,9 +35,10 @@ def J2Psearch(id:str,n:int)->pd.DataFrame:
 
         knn = {"field": f"experience__occupation__vector__{i}",
                 "query_vector": vec,
-                "k": 50,
-                "num_candidates": 50}
-        res += es.search(index=st.secrets["profilIndex"], query=query, source=["id"], knn = knn,size=50)["hits"]["hits"]
+                "k": n,
+                "num_candidates": n}
+        res += es.search(index=st.secrets["profilIndex"], query=query, source=["id"], knn = knn)["hits"]["hits"]
+
     scores = compute_scores(res,n)
     return outputFormat(scores)
 
