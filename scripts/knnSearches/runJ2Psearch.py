@@ -31,7 +31,7 @@ def J2Psearch(id:str,n:int)->pd.DataFrame:
     #                     {"range": { "educationLevel": {
     #                                   "lte" : EDUCATION}} }]} }
 
-    for i in range (1,4):
+    for i in range (0,3):
 
         knn = {"field": f"experience__occupation__vector__{i}",
                 "query_vector": vec,
