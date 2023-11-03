@@ -30,6 +30,7 @@ def main():
             st.slider("Experience Bonus",0.0,4.0,2.0,0.5,key="EB",disabled=True)
             st.slider("Liked Mission Bonus",0.0,4.0,2.0,0.5,key="LMB",disabled=True)
             st.form_submit_button("Recalculer",use_container_width=True)
+        if st.sidebar.button("Clear Cache",use_container_width=True) : st.cache_data.clear()
         st.sidebar.divider()
         # Direct to the appropriate page
         if memory.page == "Interface Profil > Mission":
