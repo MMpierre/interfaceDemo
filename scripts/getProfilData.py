@@ -9,7 +9,7 @@ def fetch_profiles(es)->list:
         try:
             data.append(fetch_data_by_id(id)) 
         except:
-            st.toast(f"Attention, l'id '{id}' n'est pas sur le graphQl")
+            pass
 
     return data
 
