@@ -47,7 +47,7 @@ def computeBonus(df,SB):
 
     # Identify index of the max value for each row
     max_indices = df[["_score1","_score2","_score3"]].idxmax(axis=1) 
-    df['non_max_sum'] = 0
+    df.loc[:,'non_max_sum'] = 0
     for i, max_idx in max_indices.items():
         non_max_values = [df[["_score1","_score2","_score3"]].iloc[i, j] for j in range(3) if j != (int(max_idx[-1])-1)]
         df.loc[i, 'non_max_sum'] = max(0,sum(non_max_values) * SB /100)

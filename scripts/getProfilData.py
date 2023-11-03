@@ -4,7 +4,13 @@ from elasticsearch import Elasticsearch
 
 def fetch_profiles(es)->list:
     ids = fetch_all_ids(es)
-    data = [fetch_data_by_id(id) for id in ids]
+    data = []
+    for id in ids :
+        try:
+            data.append(fetch_data_by_id(id)) 
+        except:
+            st.toast(f"Attention, l'id '{id}' n'est pas sur le graphQl")
+
     return data
 
 def fetch_all_ids(es):

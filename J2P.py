@@ -6,7 +6,7 @@ import elasticsearch
 from scripts.knnSearches.runJ2Psearch import J2Psearch
 from scripts.getProfilData import fetch_data_by_id
 from scripts.getMissionData import fetch_mission_data,fetch_all_missions
-
+from time import time
 memory = st.session_state
 ######################################### AFFICHAGE ##############################################################
 
@@ -104,8 +104,9 @@ def J2P():
 
     memory.missions = load_missions()
     displayMission()
+    a = time()
     profiles = ast.literal_eval(J2Psearch(memory.mission["id"],10)) 
-    
+    st.write(f"Temps écoulé : {time()-a}")
 
     displayProfiles(profiles) 
 
