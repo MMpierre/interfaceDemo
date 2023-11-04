@@ -13,6 +13,12 @@ def fetch_profiles(es)->list:
 
     return data
 
+def strip_path(id:str)->str:
+    st.write(id)
+    id = id.replace("mirrored/","")
+    st.write(id)
+    return id
+
 def fetch_all_ids(es):
     # Initial search
     query = {
@@ -33,7 +39,7 @@ def fetch_all_ids(es):
     # Continue scrolling until no more results
     while scroll_size > 0:
         res = es.scroll(scroll_id=scroll_id, scroll='1m')
-        all_ids.extend([profile["_id"] for profile in res["hits"]["hits"]])
+        all_ids.extend([profile["_id"][9:] for profile in res["hits"]["hits"]])
         scroll_size = len(res['hits']['hits'])
     
     return all_ids
@@ -87,5 +93,6 @@ def fetch_data_by_id(user_id:str):
 
 
 if __name__ == "__main__":
-        print(fetch_profiles(Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300) ))
+        # print(fetch_profiles(Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300) ))
+        print(fetch_data_by_id("835d5a92-4b45-49c1-8631-3ef3fc899bc3"))
 

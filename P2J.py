@@ -4,7 +4,7 @@ import ast
 import matplotlib.pyplot as plt
 import elasticsearch
 from scripts.knnSearches.runP2Jsearch import P2Jsearch
-from scripts.getProfilData import fetch_profiles
+from scripts.getProfilData import fetch_profiles,fetch_data_by_id
 from scripts.getMissionData import fetch_mission_data
 from streamlit_echarts import st_echarts
 #shorten session state method
@@ -24,7 +24,8 @@ def displayName(user):
 
 def displayProfile():
     st.header("Choisissez un profil",divider="red")
-    st.selectbox("Profil",memory.profiles,5,label_visibility="collapsed",format_func=lambda x: displayName(x) ,key="profil")
+    st.selectbox("Profil",memory.profiles,5,label_visibility="collapsed",format_func=lambda x: displayName(x) ,key="profil_id")
+    memory.profil = fetch_data_by_id(memory.profil_id["id"])
     try:
         st.title(f'Offres Personnalisées pour {memory.profil["personalData"][0]["given"][0]["value"].capitalize()  + " " + memory.profil["personalData"][0]["family"][0]["value"].capitalize()}')
     except:
