@@ -36,7 +36,7 @@ def J2Psearch(id:str,n:int)->pd.DataFrame:
                 "query_vector": vec,
                 "k": n,
                 "num_candidates": n}
-        getOtherScores(es.search(index=st.secrets["profilIndex"], query=query, source=["id"], knn = knn)["hits"]["hits"],es,st.secrets["profilIndex"],vec,n,i)
+        # getOtherScores(es.search(index=st.secrets["profilIndex"], query=query, source=["id"], knn = knn)["hits"]["hits"],es,st.secrets["profilIndex"],vec,n,i)
         res += es.search(index=st.secrets["profilIndex"], query=query, source=["id"], knn = knn)["hits"]["hits"]
 
     scores = compute_scores(res,n)

@@ -35,7 +35,7 @@ def displayTitle(mission):
        
 def displayMission():
     st.header("Choisissez une mission",divider="red")
-    st.selectbox("Missions",memory.missions,5,label_visibility="collapsed",format_func=lambda x: displayTitle(x),key="mission")
+    st.selectbox("Missions",memory.missions,0,label_visibility="collapsed",format_func=lambda x: displayTitle(x),key="mission")
     memory.data = fetch_mission_data(memory.mission["id"],memory.es)
     with st.expander("Description"):
         st.markdown(memory.data["description__value"],unsafe_allow_html=True)
@@ -63,11 +63,12 @@ def displayName(user):
         return user["id"]
     
 def displayProfiles(profiles):
-    
-    for i,profil in enumerate(profiles):
+    with st.spinner("Récupération des profils"): 
+        datas = fetch_data_by_id([profil["id"][9:] for profil in profiles])
+        
+    for i,(profil,data) in enumerate(zip(profiles,datas)):
 
         with st.container():
-            data = fetch_data_by_id(profil["id"][9:])
 
             score = profil["score"]
             if score > 80:
@@ -104,9 +105,8 @@ def J2P():
 
     memory.missions = load_missions()
     displayMission()
-    a = time()
-    profiles = ast.literal_eval(J2Psearch(memory.mission["id"],10)) 
-    st.write(f"Temps écoulé : {time()-a}")
+    with st.spinner("Calcul des scores ..."):
+        profiles = ast.literal_eval(J2Psearch(memory.mission["id"],10)) 
 
     displayProfiles(profiles) 
 

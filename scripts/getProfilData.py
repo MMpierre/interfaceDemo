@@ -2,22 +2,19 @@ import requests
 import streamlit as st
 from elasticsearch import Elasticsearch
 
-def fetch_profiles(es)->list:
+def fetch_profiles(es, batch_size=15) -> list:
     ids = fetch_all_ids(es)
     data = []
-    for id in ids :
+    for i in range(0, len(ids), batch_size):
+        batch_ids = ids[i:i+batch_size]
         try:
-            data.append(fetch_data_by_id(id)) 
-        except:
-            pass
+            data.extend(fetch_reduced_data_by_ids(batch_ids))  # Note the plural 'ids'
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
     return data
 
-def strip_path(id:str)->str:
-    st.write(id)
-    id = id.replace("mirrored/","")
-    st.write(id)
-    return id
+
 
 def fetch_all_ids(es):
     # Initial search
@@ -43,6 +40,32 @@ def fetch_all_ids(es):
         scroll_size = len(res['hits']['hits'])
     
     return all_ids
+
+
+
+
+def fetch_reduced_data_by_ids(user_ids: list) -> list:
+    url = st.secrets["graphQL"]
+    detailed_query = """
+    query Users($userIds: [ID]) {
+        User(id: $userIds) {
+            id
+            personalData {
+                family { value }
+                given { value }
+            }
+        }
+    }"""
+
+    variables = {"userIds": user_ids}
+    
+    response = requests.post(url, json={"query": detailed_query, "variables": variables})
+    if response.status_code == 200:
+        data = response.json()
+        return data["data"]["User"]
+    else:
+        print(f"Query failed with status code {response.text}")
+        return []
 
 
 
@@ -86,7 +109,7 @@ def fetch_data_by_id(user_id:str):
 
     if response.status_code == 200:
         data = response.json()
-        return data["data"]["User"][0]
+        return data["data"]["User"]
     else:
         print(f"Query failed with status code {response.text}")
 

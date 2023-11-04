@@ -25,7 +25,8 @@ def displayName(user):
 def displayProfile():
     st.header("Choisissez un profil",divider="red")
     st.selectbox("Profil",memory.profiles,5,label_visibility="collapsed",format_func=lambda x: displayName(x) ,key="profil_id")
-    memory.profil = fetch_data_by_id(memory.profil_id["id"])
+    with st.spinner("Chargement du Profil"):
+        memory.profil = fetch_data_by_id(memory.profil_id["id"])
     try:
         st.title(f'Offres Personnalisées pour {memory.profil["personalData"][0]["given"][0]["value"].capitalize()  + " " + memory.profil["personalData"][0]["family"][0]["value"].capitalize()}')
     except:
@@ -90,7 +91,8 @@ def displayOffers(job_offerings):
                 st.error("Enfin, les offres ci-dessous sont encore plus éloignées mais peuvent néanmoins être intéressantes pour discussion avec le client")
 
         with st.container():
-            data = fetch_mission_data(offer["id"],memory.es)
+            with st.spinner("Chargement de la mission"):
+                data = fetch_mission_data(offer["id"],memory.es)
             
             score = offer["score"]
             if score > 70:
@@ -137,14 +139,14 @@ def P2J():
     #shorten session state method
     memory = st.session_state
     memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)  # 5 minute timeout
-
     memory.profiles = load_profiles()
     displayProfile()
-    if len(memory.profil["personalData"][0]["location"][0]["geolocation"])>0:
-        job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),geo=memory.profil["personalData"][0]["location"][0]["geolocation"][0]["value"].split(","),distance=memory.profil["personalData"][0]["preferredDistance"][0]["value"])) 
-        # job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None))   
-    else:
-        job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None))
+    with st.spinner("Calcul des scores ..."):
+        if len(memory.profil["personalData"][0]["location"][0]["geolocation"])>0:
+            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),geo=memory.profil["personalData"][0]["location"][0]["geolocation"][0]["value"].split(","),distance=memory.profil["personalData"][0]["preferredDistance"][0]["value"])) 
+            # job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None))   
+        else:
+            job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],10,len(memory.profil["experience"]),None,None))
 
     displayOffers(job_offerings) 
 
