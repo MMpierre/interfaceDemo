@@ -26,7 +26,7 @@ def displayProfile():
     st.header("Choisissez un profil",divider="red")
     st.selectbox("Profil",memory.profiles,5,label_visibility="collapsed",format_func=lambda x: displayName(x) ,key="profil_id")
     with st.spinner("Chargement du Profil"):
-        memory.profil = fetch_data_by_id(memory.profil_id["id"])
+        memory.profil = fetch_data_by_id([memory.profil_id["id"]])[0]
     try:
         st.title(f'Offres Personnalisées pour {memory.profil["personalData"][0]["given"][0]["value"].capitalize()  + " " + memory.profil["personalData"][0]["family"][0]["value"].capitalize()}')
     except:
