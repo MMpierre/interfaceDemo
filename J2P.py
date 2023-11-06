@@ -46,11 +46,26 @@ def displayMission():
                 label="Mission",
                 description="",
                 color_name="red-80",)
-        st.info(memory.data["agency__prefLabel"])
-        st.info(f'{memory.data["address__city__0"]}, {memory.data["address__postalcode__0"]}')
-        st.info("Durée : " + memory.data["contract__contractLengthValue"]+ " " + memory.data["contract__contractLengthUnit"])
-        st.info("Contrat : " + memory.data["contract__workTime"])
-        st.link_button("URL",memory.data["url__value"],use_container_width=True)
+        try:
+            st.info(memory.data["agency__prefLabel"])
+        except:
+            st.info("Pas de numéro d'agence")
+        try:
+            st.info(f'{memory.data["address__city__0"]}, {memory.data["address__postalcode__0"]}')
+        except:
+            st.info("Pas d'adresse")
+        try:
+            st.info("Durée : " + memory.data["contract__contractLengthValue"]+ " " + memory.data["contract__contractLengthUnit"])
+        except:
+            st.info("Pas de durée de contrat")
+        try:
+            st.info("Contrat : " + memory.data["contract__workTime"])
+        except:
+            st.info("Pas de type de contrat")
+        try:
+            st.link_button("URL",memory.data["url__value"],use_container_width=True)
+        except:
+            st.info("Pas de lien vers l'offre")
         
     
 
