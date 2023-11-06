@@ -109,7 +109,9 @@ def displayProfiles(profiles):
 
             with card:
                 # scoreCard(score,i)
-                st.metric("Score",f"{(score // 0.1)/10} %")
+                st.metric("Score",f"{(score // 0.1)/10} %",label_visibility='collapsed')
+                if memory.data["id"] in [mission["id"] for mission in data["favoriteMissions"]]:
+                    st.success("Mission Likée")
 
 
 
