@@ -43,7 +43,7 @@ def computeScaling(original_score, SC):
 
 def computeBonus(df,SB):
 
-    df["customWeight"] = df[["_score1","_score2","_score3"]].max(axis=1) 
+    df.loc[:,'customWeight']  = df[["_score1","_score2","_score3"]].max(axis=1) 
 
     # Identify index of the max value for each row
     max_indices = df[["_score1","_score2","_score3"]].idxmax(axis=1) 
@@ -52,7 +52,7 @@ def computeBonus(df,SB):
         non_max_values = [df[["_score1","_score2","_score3"]].iloc[i, j] for j in range(3) if j != (int(max_idx[-1])-1)]
         df.loc[i, 'non_max_sum'] = max(0,sum(non_max_values) * SB /100)
 
-    df['customWeight'] += df['non_max_sum']
+    df.loc[:,'customWeight'] += df['non_max_sum']
     df.drop(columns=['non_max_sum'], inplace=True)
 
     return df['customWeight']
