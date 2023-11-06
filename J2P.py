@@ -123,7 +123,7 @@ def J2P():
     memory.missions = load_missions()
     displayMission()
     with st.spinner("Calcul des scores ..."):
-        profiles = ast.literal_eval(J2Psearch(memory.mission["id"],10)) 
+        profiles = ast.literal_eval(J2Psearch(memory.mission["id"],st.session_state.n)) 
 
     displayProfiles(profiles) 
 

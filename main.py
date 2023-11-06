@@ -30,6 +30,10 @@ def main():
             st.slider("Experience Bonus",0.0,4.0,2.0,0.5,key="EB",disabled=True)
             st.slider("Liked Mission Bonus",0.0,4.0,2.0,0.5,key="LMB",disabled=True)
             st.form_submit_button("Recalculer",use_container_width=True)
+        with st.sidebar.expander("Paramètres",expanded=False),st.form("settings"):
+            st.header("Paramètre admin",divider="red")
+            st.number_input('Nombre de résultats à afficher',1,25,10,1,key="n")
+            st.form_submit_button("Appliquer",use_container_width=True)
         if st.sidebar.button("Clear Cache",use_container_width=True) : st.cache_data.clear()
         st.sidebar.divider()
         # Direct to the appropriate page
@@ -39,8 +43,8 @@ def main():
             J2P()
 
 
-def init_parameters(SC=5,EB=2,SB=2,LMB=2):
-    memory.SC,memory.EB,memory.SB,memory.LMB = SC,EB,SB,LMB
+def init_parameters(SC=5,EB=2,SB=2,LMB=2,n=10):
+    memory.SC,memory.EB,memory.SB,memory.LMB,memory.n = SC,EB,SB,LMB,n
     
     
        
