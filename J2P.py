@@ -35,7 +35,7 @@ def displayTitle(mission):
 def displayMission():
     st.header("Choisissez une mission",divider="red")
     st.selectbox("Missions",memory.missions,0,label_visibility="collapsed",format_func=lambda x: displayTitle(x),key="mission")
-    memory.data = fetch_mission_by_id(memory.mission["id"])
+    memory.data = fetch_mission_by_id(memory.mission["id"])[0]
     with st.expander("Description"):
         st.markdown(memory.data["description"][0]["value"],unsafe_allow_html=True)
     st.title(f'Profils Personnalisés pour {memory.mission["title__value"]}')
