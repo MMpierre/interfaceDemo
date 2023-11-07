@@ -76,42 +76,44 @@ def displayName(user):
         return user["personalData"][0]["given"][0]["value"].capitalize() + " " + user["personalData"][0]["family"][0]["value"].capitalize() 
     except:
         return user["id"]
+
+def displayProfile(profil,data):
+
+    score = profil["score"]
+    if score > 80:
+        colored_header(displayName(data),"","green-50")
+    elif score > 70:
+        colored_header(displayName(data),"","orange-50")
+    else:
+        colored_header(displayName(data),"","red-50")
+
+    profil,card = st.columns([7,1])
     
+    with profil:  
+        jobs = st.columns(len(data["experience"]))
+        for i,job in enumerate(jobs):
+            with job:
+                try:
+                    st.info(data["experience"][i]["title"][0]["value"])
+                    st.info(data["experience"][i]["duration"][0]["value"])
+                except:
+                    st.warning("Pas d'informations")
+
+        
+
+    with card:
+        # scoreCard(score,i)
+        st.metric("Score",f"{(score // 0.1)/10} %",label_visibility='collapsed')
+        if memory.data["id"] in [mission["id"] for mission in data["favoriteMissions"]]:
+            st.success("Mission Likée")
+
 def displayProfiles(profiles):
     with st.spinner("Récupération des profils"): 
         datas = fetch_data_by_id([profil["id"][9:] for profil in profiles])
         
     for i,(profil,data) in enumerate(zip(profiles,datas)):
-
         with st.container():
-
-            score = profil["score"]
-            if score > 80:
-                colored_header(displayName(data),"","green-50")
-            elif score > 70:
-                colored_header(displayName(data),"","orange-50")
-            else:
-                colored_header(displayName(data),"","red-50")
-
-            profil,card = st.columns([7,1])
-            
-            with profil:  
-                jobs = st.columns(len(data["experience"]))
-                for i,job in enumerate(jobs):
-                    with job:
-                        try:
-                            st.info(data["experience"][i]["title"][0]["value"])
-                            st.info(data["experience"][i]["duration"][0]["value"])
-                        except:
-                            st.warning("Pas d'informations")
-
-                
-
-            with card:
-                # scoreCard(score,i)
-                st.metric("Score",f"{(score // 0.1)/10} %",label_visibility='collapsed')
-                if memory.data["id"] in [mission["id"] for mission in data["favoriteMissions"]]:
-                    st.success("Mission Likée")
+            displayProfile(profil,data)
 
 
 
@@ -123,7 +125,7 @@ def J2P():
     memory.missions = load_missions()
     displayMission()
     with st.spinner("Calcul des scores ..."):
-        profiles = ast.literal_eval(J2Psearch(memory.mission["id"],st.session_state.n)) 
+        profiles = ast.literal_eval(J2Psearch(memory.mission["id"],memory.n)) 
 
     displayProfiles(profiles) 
 
