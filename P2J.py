@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import elasticsearch
 from scripts.knnSearches.runP2Jsearch import P2Jsearch,P2Jsearch_Liked
 from scripts.getProfilData import fetch_profiles,fetch_data_by_id
-from scripts.getMissionData import fetch_mission_data
+from scripts.getMissionData import fetch_mission_by_id
 from streamlit_echarts import st_echarts
 #shorten session state method
 memory = st.session_state
@@ -62,36 +62,35 @@ def displayProfile():
 
 # MATCHING ##############################################################
 def displayOffer(offer,data):
-    
     score = offer["score"]
     if score > 70:
-        colored_header(data["title__value"],"","green-50")
+        colored_header(data["title"][0]["value"],"","green-50")
     elif score > 65:
-        colored_header(data["title__value"],"","orange-50")
+        colored_header(data["title"][0]["value"],"","orange-50")
     else:
-        colored_header(data["title__value"],"","red-50")
+        colored_header(data["title"][0]["value"],"","red-50")
 
     mission,card = st.columns([7,1])
     with mission:  
         desc,url = st.columns([9,1])
         with desc.expander("Description",expanded=False):
-            st.markdown(data["description__value"],unsafe_allow_html=True) 
-        url.link_button("URL Proman",data["url__value"])
+            st.markdown(data["description"][0]["value"],unsafe_allow_html=True) 
+        url.link_button("URL Proman",data["url"][0]["value"])
         ad,w,l,ag = st.columns([3,3,3,1])
         try:
-            ad.info(data["address__city__0"].capitalize() + ", " + data["address__postalcode__0"])
+            ad.info(data["missionAddress"][0]["city"][0]["value"].capitalize() + ", " + data["missionAddress"][0]["postalcode"][0]["value"])
         except:
             ad.info("Adresse non précisée")
         try:
-            w.info(data["contract__workTime"])
+            w.info(data["contract"][0]["workTime"][0]["value"])
         except:
             w.info("Type de contrat non précisé")
         try:
-            l.info(data["contract__contractLengthValue"]+ " " + data["contract__contractLengthUnit"])
+            l.info(data["contract"][0]["contractLengthValue"][0]["value"]+ " " + data["contract"][0]["contractLengthUnit"][0]["value"])
         except:
             l.info("Durée contrat non précisée")
         try:
-            ag.info(data["agency"][0][7:])
+            ag.info(data["agency"][0]["prefLabel"][0]["value"][-5:])
         except:
             ag.info("404")
 
@@ -111,7 +110,10 @@ def displayOffers(job_offerings):
 
     # Create the tuple (a, b, c)
     seuil = (0, b, c)
-    for i,offer in enumerate(job_offerings):
+    with st.spinner("Chargement des mission"):
+        datas = fetch_mission_by_id([offer["id"] for offer in job_offerings])
+        
+    for i,(offer,data) in enumerate(zip(job_offerings,datas)):
 
         if i == seuil[0]:
             with st.expander("Seuil de confiance 1",expanded=True):
@@ -123,8 +125,6 @@ def displayOffers(job_offerings):
             with st.expander("Seuil de confiance 3",expanded=True):
                 st.error("Enfin, les offres ci-dessous sont encore plus éloignées mais peuvent néanmoins être intéressantes pour discussion avec le client")
 
-        with st.spinner("Chargement de la mission"):
-            data = fetch_mission_data(offer["id"],memory.es)
         with st.container():
            displayOffer(offer,data)
 

@@ -29,12 +29,73 @@ def fetch_all_missions(es):
     
     return all_missions
 
-def fetch_mission_data(mission_id,es):
 
-    query = {  "match": {
-            "_id": mission_id}}
-    res = es.search(index=st.secrets["jobIndex"], query=query, source_excludes=["vector"])["hits"]["hits"][0]["_source"]
-    return res
+def fetch_mission_by_id(mission_id:list):
+    
+    url = st.secrets["graphQL"]
+    detailed_query = """query User($missionsPromanId: [ID]) {
+                            missionsProman(id: $missionsPromanId) {
+                                Mission {
+                                agency {
+                                    prefLabel {
+                                    value
+                                    }
+                                }
+                                area {
+                                    prefLabel {
+                                    value
+                                    }
+                                }
+                                userLiked{
+                                    id
+                                }
+                                contract {
+                                    contractLengthUnit {
+                                    value
+                                    }
+                                    contractLengthValue {
+                                    value
+                                    }
+                                }
+                                description {
+                                    value
+                                }
+                                title {
+                                    value
+                                }
+                                missionAddress {
+                                    city {
+                                    value
+                                    }
+                                    postalcode {
+                                    value
+                                    }
+                                    geolocation {
+                                    value
+                                    }
+                                }
+                                url {
+                                    value
+                                }
+                                sector {
+                                    prefLabel {
+                                    value
+                                    }
+                                id
+                                }
+                                }
+                            }
+                            }"""
+
+    variables = {"missionsPromanId": mission_id}
+    
+    response = requests.post(url, json={"query": detailed_query, "variables": variables})
+
+    if response.status_code == 200:
+        data = response.json()
+        return data["data"]["missionsProman"]["Mission"]
+    else:
+        print(f"Query failed with status code {response.text}")
 
 if __name__ == "__main__":
-    print(fetch_all_missions(Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)))
+    print(fetch_mission_by_id("pm:MP809910-2023-09-26"))

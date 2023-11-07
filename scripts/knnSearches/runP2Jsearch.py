@@ -64,7 +64,6 @@ def P2Jsearch_Liked(id:str,n:int,expected:int,likedIds:list)->pd.DataFrame:
         
 
         hits = []
-        warning = False
         for vec in vecs:
             query = {"bool": {"must": [ {"ids": {"values": likedIds}}]}}
 
