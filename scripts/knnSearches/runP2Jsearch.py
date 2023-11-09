@@ -48,7 +48,7 @@ def P2Jsearch(id:str, n:int, expected:int, geo:tuple, distance:int) -> pd.DataFr
         
         # Perform the multi-search request
         msearch_response = es.msearch(body=msearch_request_body)
-        st.write(msearch_response)
+        
         if len(msearch_response["responses"][0]["hits"]["hits"])==0:
             warning = True
             st.warning("Pas d'offres dans votre région")
