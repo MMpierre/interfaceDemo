@@ -28,17 +28,17 @@ def fetch_all_ids(es):
             }
         }
     
-    res = es.search(index=st.secrets["profilIndex"],size=100,source=["_id"], query=query,scroll='1m')
+    res = es.search(index=st.secrets["profilIndex"],size=100,source=["_id"], query=query,scroll='1m',)
     scroll_id = res['_scroll_id']
     scroll_size = len(res['hits']['hits'])
-    
+    print(res)
     all_ids = [profile["_id"][9:] for profile in res["hits"]["hits"]]
     # Continue scrolling until no more results
     while scroll_size > 0:
         res = es.scroll(scroll_id=scroll_id, scroll='1m')
         all_ids.extend([profile["_id"][9:] for profile in res["hits"]["hits"]])
         scroll_size = len(res['hits']['hits'])
-    
+    all_ids.reverse()
     return all_ids
 
 
@@ -58,15 +58,16 @@ def fetch_reduced_data_by_ids(user_ids: list) -> list:
     }"""
 
     variables = {"userIds": user_ids}
-    
-    response = requests.post(url, json={"query": detailed_query, "variables": variables})
+    try:
+        response = requests.post(url, json={"query": detailed_query, "variables": variables},timeout=60)
+    except requests.Timeout:
+        st.error("Il y a l'air d'avoir un problème avec le grapqhQL")
     if response.status_code == 200:
         data = response.json()
         return data["data"]["User"]
     else:
         print(f"Query failed with status code {response.text}")
         return []
-
 
 
 def fetch_data_by_id(user_id:str):
@@ -117,5 +118,5 @@ def fetch_data_by_id(user_id:str):
 
 if __name__ == "__main__":
         # print(fetch_profiles(Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300) ))
-        print(fetch_data_by_id("835d5a92-4b45-49c1-8631-3ef3fc899bc3"))
+        print(fetch_all_ids(Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)))
 

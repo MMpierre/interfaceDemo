@@ -5,53 +5,67 @@ from .imports.getProfilVectors import getProfilVectors
 from .imports.computeScore import compute_scores
 from .imports.outputFormat import outputFormat
 import streamlit as st
+import json
 # Input - ID de la mission
 # Output - ID des profils + scores
 
 
-
-
-def P2Jsearch(id:str,n:int,expected:int,geo:tuple,distance:int)->pd.DataFrame:
-
+def P2Jsearch(id:str, n:int, expected:int, geo:tuple, distance:int) -> pd.DataFrame:
     es = getElasticClient()
-    vecs = getProfilVectors(id,es,st.secrets["profilIndex"])
-    if len(vecs)>0:
-        if len(vecs)<expected:
+    vecs = getProfilVectors(id, es, st.secrets["profilIndex"])
+    
+    if len(vecs) > 0:
+        if len(vecs) < expected:
             st.warning(f'Attention ! nous avons récupéré uniquement {len(vecs)} vecteur(s) pour {expected} expériences')
         
-
-        hits = []
-        warning = False
+        requests = []
         for vec in vecs:
-            query = {"match_all": {}}
-            knn = {"field": "vector",
+            header = {"index": st.secrets["jobIndex"]}
+            body = {
+                "query": {"match_all": {}},
+                "_source": ["id"],
+                "size": n,
+                "knn": {
+                    "field": "vector",
                     "query_vector": vec,
-                    "k": 50,
-                    "num_candidates": 50}
+                    "k": n,
+                    "num_candidates": n
+                }
+            }
             if geo:
-                filter = {"bool": {
+                body["post_filter"] = {"bool": {
                             "must": [
                                 {"geo_distance": { "distance": distance,
                                                     "address__geolocation__0": {
                                                             "lon": geo[0],
                                                             "lat": geo[1] }}}
                                                             ]}}
-                
-                res = es.search(index=st.secrets["jobIndex"], query=query, source=["id"],post_filter=filter, knn = knn,size=50)
-                if len(res["hits"]["hits"]) == 0:
-                    res = es.search(index=st.secrets["jobIndex"], query=query, source=["id"], knn = knn,size=50)
-                    if not(warning):
-                        warning = True            
-                        st.warning("Pas d'offres dans votre région")
-                hits += res["hits"]["hits"]
-            else:
-                res = es.search(index=st.secrets["jobIndex"], query=query, source=["id"], knn = knn,size=50)
-                hits += res["hits"]["hits"]
-        score_df = compute_scores(hits,n)
+            requests.append(json.dumps(header))
+            requests.append(json.dumps(body))
+        
+        # Join the requests with newline characters and add a final newline character at the end
+        msearch_request_body = '\n'.join(requests) + '\n'
+        
+        # Perform the multi-search request
+        msearch_response = es.msearch(body=msearch_request_body)
+        if len(msearch_response)==0:
+            warning = True
+            st.warning("Pas d'offres dans votre région")
+            body["post_filter"] = {}
+            requests.append(json.dumps(header))
+            requests.append(json.dumps(body))
+            msearch_request_body = '\n'.join(requests) + '\n'
+            msearch_response = es.msearch(body=msearch_request_body)
+        hits = []
+        for response in msearch_response['responses']:
+            hits += response["hits"]["hits"]
+            
+        score_df = compute_scores(hits, n)
         return outputFormat(score_df)
     else:
         st.error("Pas de vecteur pour ce profil sur ElasticSearch")
-        return("[]")
+        return pd.DataFrame()
+
 
   
 def P2Jsearch_Liked(id:str,n:int,expected:int,likedIds:list)->pd.DataFrame:
@@ -69,10 +83,11 @@ def P2Jsearch_Liked(id:str,n:int,expected:int,likedIds:list)->pd.DataFrame:
 
             knn = {"field": "vector",
                     "query_vector": vec,
-                    "k": 50,
-                    "num_candidates": 50}
-            res = es.search(index=st.secrets["jobIndex"], query=query, source=["id"], knn = knn,size=50)
+                    "k": st.session_state.n,
+                    "num_candidates": st.session_state.n}
+            res = es.search(index=st.secrets["jobIndex"], query=query, source=["id"], knn = knn,size=st.session_state.n )
             hits += res["hits"]["hits"]
+ 
         score_df = compute_scores(hits,n)
         return outputFormat(score_df)
     else:

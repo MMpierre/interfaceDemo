@@ -26,9 +26,7 @@ def fetch_all_missions(es):
         res = es.scroll(scroll_id=scroll_id, scroll='1m')
         all_missions.extend([profile["_source"] for profile in res["hits"]["hits"]])
         scroll_size = len(res['hits']['hits'])
-    
     return all_missions
-
 
 def fetch_mission_by_id(mission_id:list):
     

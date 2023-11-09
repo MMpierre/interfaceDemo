@@ -27,6 +27,7 @@ def displayProfile():
     st.selectbox("Profil",memory.profiles,5,label_visibility="collapsed",format_func=lambda x: displayName(x) ,key="profil_id")
     with st.spinner("Chargement du Profil"):
         memory.profil = fetch_data_by_id([memory.profil_id["id"]])[0]
+    
     try:
         st.title(f'Offres Personnalisées pour {memory.profil["personalData"][0]["given"][0]["value"].capitalize()  + " " + memory.profil["personalData"][0]["family"][0]["value"].capitalize()}')
     except:
@@ -42,9 +43,18 @@ def displayProfile():
         except:
             st.info("Pas d'adresse email")
         try:
-            st.info(memory.profil["personalData"][0]["location"][0]["city"][0]["value"])
+            town,url = st.columns([3,1])
+            town.info(memory.profil["personalData"][0]["location"][0]["city"][0]["value"] + ", " + memory.profil["personalData"][0]["location"][0]["postalcode"][0]["value"])
+            longitude,lattitude = memory.profil["personalData"][0]["location"][0]["geolocation"][0]["value"].split(",")
+            url.link_button("🌎",f"https://www.google.com/maps?q={lattitude},{longitude}",use_container_width=True)
         except:
-            st.info("Pas d'adresse")
+            try:
+                town,url = st.columns([3,1])
+                town.info(memory.profil["personalData"][0]["location"][0]["city"][0]["value"])
+                longitude,lattitude = memory.profil["personalData"][0]["location"][0]["geolocation"][0]["value"].split(",")
+                url.link_button("🌎",f"https://www.google.com/maps?q={lattitude},{longitude}",use_container_width=True)
+            except:
+                st.info("Pas d'adresse")
         colored_header(
                 label="Expérience",
                 description="",
@@ -96,10 +106,11 @@ def displayOffer(offer,data):
 
     with card:
         st.metric("Score",f"{(score // 0.1)/10} %",label_visibility='collapsed')
+        # score2 = ast.literal_eval(P2Jsearch_Liked("mirrored/"  + memory.profil["id"],1,len(memory.profil["experience"]),[offer["id"]]))
+        # st.metric("Score2",score2[0]["score"],label_visibility="collapsed")
         if len(memory.profil["favoriteMissions"])>0:
-            for fmission in memory.profil["favoriteMissions"]:
-                if fmission["id"] == offer["id"]:
-                    st.success("Missions likée")
+            if offer["id"] in memory.profil["favoriteMissions"]:
+                st.success("Missions likée")
 
 def displayOffers(job_offerings):
     

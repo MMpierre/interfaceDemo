@@ -15,14 +15,15 @@ def load_missions():
     return [x for x in fetch_all_missions(memory.es)]
 
 
-st.markdown("""
-    <style>
-        .stMultiSelect [data-baseweb=select] span{
-            max-width: 250px;
-            font-size: 1rem;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+css = '''
+<style>
+    .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+    font-size:2rem;
+    }
+</style>
+'''
+
+st.markdown(css, unsafe_allow_html=True)
 
     
 ######################################### AFFICHAGE ##############################################################

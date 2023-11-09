@@ -3,7 +3,7 @@ import streamlit as st
 memory = st.session_state
 
 def compute_scores(l:list,n:int)->pd.DataFrame:
-    SC,EB,SB,LMB = getParameters()
+    SC = getParameters()
     df = pd.DataFrame(l)
     
     processed_groups = []
@@ -28,14 +28,14 @@ def compute_scores(l:list,n:int)->pd.DataFrame:
     # Drop the original '_score' column if needed
     final_df.drop(columns=['_score'], inplace=True)
     final_df.fillna(1,inplace=True)
-
-    final_df["_score"] = computeBonus(final_df[["_score1","_score2","_score3"]],SB)
+    
+    final_df.loc[:,'_score']  = final_df[["_score1","_score2","_score3"]].max(axis=1) 
 
     return final_df.sort_values('_score',ascending=False)[:n]
 
 
 def getParameters():
-    return memory.SC,memory.EB,memory.SB,memory.LMB
+    return memory.SC
 
 def computeScaling(original_score, SC):
     new_score = ((original_score - (SC * 7)) / (100 - (SC * 7))) * 100
