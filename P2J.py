@@ -29,7 +29,7 @@ def displayProfile():
         memory.profil = fetch_data_by_id([memory.profil_id["id"]])[0]
     
     try:
-        st.title(f'Offres Personnalisées pour {memory.profil["personalData"][0]["given"][0]["value"].capitalize()  + " " + memory.profil["personalData"][0]["family"][0]["value"].capitalize()}')
+        st.title(f'Offres Personnalisées pour {displayName(memory.profil)}')
     except:
         st.title(f'Offres Personnalisées pour {memory.profil["id"]} (Pas de nom)')
 
@@ -151,7 +151,7 @@ def P2J():
     tabs = st.tabs(["Missions Proposées",f"Mission Likées ({len(memory.profil['favoriteMissions'])})"])
     with tabs[0]:
         with st.spinner("Calcul des scores ..."):
-            if len(memory.profil["personalData"][0]["location"][0]["geolocation"])>0:
+            if len(memory.profil["personalData"][0]["location"])>0 and len(memory.profil["personalData"][0]["location"][0]["geolocation"])>0:
                 job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],memory.n,len(memory.profil["experience"]),geo=memory.profil["personalData"][0]["location"][0]["geolocation"][0]["value"].split(","),distance=memory.profil["personalData"][0]["preferredDistance"][0]["value"])) 
             else:
                 job_offerings = ast.literal_eval(P2Jsearch("mirrored/"  + memory.profil["id"],memory.n,len(memory.profil["experience"]),None,None))
