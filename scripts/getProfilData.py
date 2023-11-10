@@ -30,8 +30,7 @@ def fetch_all_ids(es):
     
     res = es.search(index=st.secrets["profilIndex"],size=100,source=["_id"], query=query,scroll='1m',)
     scroll_id = res['_scroll_id']
-    scroll_size = len(res['hits']['hits'])
-    print(res)
+    scroll_size = len(res['hits']['hits'])  
     all_ids = [profile["_id"][9:] for profile in res["hits"]["hits"]]
     # Continue scrolling until no more results
     while scroll_size > 0:

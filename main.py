@@ -1,6 +1,6 @@
 import streamlit as st
 st.set_page_config(layout="wide")
-from P2J import P2J
+from P2J import P2J 
 from J2P import J2P
 memory = st.session_state
 
@@ -25,7 +25,8 @@ def main():
         if r.button("Mission > Profil",use_container_width=True) : memory.page = "Interface Mission > Profil"
         with st.sidebar.expander("Paramètres",expanded=False),st.form("settings"):
             st.header("Paramètre admin",divider="red")
-            st.slider("Scaling",0,10,7,1,key="SC")
+            st.slider("Scaling",0,10,0,1,key="SC")
+            st.checkbox("Afficher les pourcentages",value=True,key="showScores")
             st.number_input('Nombre de résultats à afficher',1,25,10,1,key="n")
             st.form_submit_button("Appliquer",use_container_width=True)
         if st.sidebar.button("Clear Cache",use_container_width=True) : st.cache_data.clear()
@@ -37,9 +38,6 @@ def main():
             J2P()
 
 
-def init_parameters(SC=5,EB=2,SB=2,LMB=2,n=10):
-    memory.SC,memory.EB,memory.SB,memory.LMB,memory.n = SC,EB,SB,LMB,n
-    
     
        
 if __name__ == "__main__":

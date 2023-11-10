@@ -4,103 +4,74 @@ import pandas as pd
 from .imports.getProfilVectors import getProfilVectors
 from .imports.computeScore import compute_scores
 from .imports.outputFormat import outputFormat
+from .imports.ESquery import *
 import streamlit as st
 import json
+import ast
 # Input - ID de la mission
 # Output - ID des profils + scores
 
 
 def P2Jsearch(id:str, n:int, expected:int, geo:tuple, distance:int) -> pd.DataFrame:
     es = getElasticClient()
-    vecs = getProfilVectors(id, es, st.secrets["profilIndex"])
-    
+    vecs = getProfilVectors(id, es, st.secrets["profilIndex"],expected)
+
     if len(vecs) > 0:
-        if len(vecs) < expected:
-            st.warning(f'Attention ! nous avons récupéré uniquement {len(vecs)} vecteur(s) pour {expected} expériences')
-        
         requests = []
+        if geo:
+            with st.spinner("Récupération des missions dans la région ..."):
+                geo_ids = get_geo_matching_ids(es,st.secrets["jobIndex"],geo,distance)
+        if len(geo_ids)==0:
+            st.warning("Pas d'offres dans votre région")
+
         for vec in vecs:
-            header = {"index": st.secrets["jobIndex"]}
-            body = {
-                "query": {"match_all": {}},
-                "_source": ["id"],
-                "size": n,
-                "knn": {
-                    "field": "vector",
-                    "query_vector": vec,
-                    "k": n,
-                    "num_candidates": n
-                }
-            }
-            if geo:
-                body["post_filter"] = {"bool": {
-                            "must": [
-                                {"geo_distance": { "distance": distance,
-                                                    "address__geolocation__0": {
-                                                            "lon": geo[0],
-                                                            "lat": geo[1] }}}
-                                                            ]}}
+            if geo and len(geo_ids)>0:
+                header, body = construct_basic_search_request(vec,st.secrets["jobIndex"],n)
+                body["knn"]["filter"] =  {"bool": {"must": [ {"ids": {"values": geo_ids}}]}}
+                body["size"] = min(len(geo_ids),n)
+            else:
+                header,body = construct_basic_search_request(vec,st.secrets["jobIndex"],n)
             requests.append(json.dumps(header))
             requests.append(json.dumps(body))
         
         # Join the requests with newline characters and add a final newline character at the end
         msearch_request_body = '\n'.join(requests) + '\n'
-        
-        # Perform the multi-search request
-        msearch_response = es.msearch(body=msearch_request_body)
-        
-        if len(msearch_response["responses"][0]["hits"]["hits"])==0:
-            warning = True
-            st.warning("Pas d'offres dans votre région")
-            body = {
-                "query": {"match_all": {}},
-                "_source": ["id"],
-                "size": n,
-                "knn": {
-                    "field": "vector",
-                    "query_vector": vec,
-                    "k": n,
-                    "num_candidates": n
-                }
-            }
-            requests.append(json.dumps(header))
-            requests.append(json.dumps(body))
-            msearch_request_body = '\n'.join(requests) + '\n'
+        with st.spinner("Calcul des meilleures offres ..."):
+            # Perform the multi-search request
             msearch_response = es.msearch(body=msearch_request_body)
-        hits = []
-        for response in msearch_response['responses']:
-            hits += response["hits"]["hits"]
-            
-        score_df = compute_scores(hits, n)
-        return outputFormat(score_df)
+
+        hits = [hit for response in msearch_response['responses'] for hit in response["hits"]["hits"]]
+
+        score_df = compute_scores(hits,n)
+        return score_df.loc[:,["_id","_score","exp"]]
     else:
         st.error("Pas de vecteur pour ce profil sur ElasticSearch")
-        return pd.DataFrame()
+        return None
 
 
   
 def P2Jsearch_Liked(id:str,n:int,expected:int,likedIds:list)->pd.DataFrame:
 
     es = getElasticClient()
-    vecs = getProfilVectors(id,es,st.secrets["profilIndex"])
+    vecs = getProfilVectors(id,es,st.secrets["profilIndex"],expected)
     if len(vecs)>0:
-        if len(vecs)<expected:
-            st.warning(f'Attention ! nous avons récupéré uniquement {len(vecs)} vecteur(s) pour {expected} expériences')
         
 
-        hits = []
+        requests = []
         for vec in vecs:
-            query = {"bool": {"must": [ {"ids": {"values": likedIds}}]}}
+            header,body = construct_basic_search_request(vec,st.secrets["jobIndex"],n)
+            body["query"] = {"bool": {"must": [ {"ids": {"values": likedIds}}]}}
+            requests.append(json.dumps(header))
+            requests.append(json.dumps(body))
+        msearch_request_body = '\n'.join(requests) + '\n'
+        
+        # Perform the multi-search request
+        msearch_response = es.msearch(body=msearch_request_body)
 
-            knn = {"field": "vector",
-                    "query_vector": vec,
-                    "k": st.session_state.n,
-                    "num_candidates": st.session_state.n}
-            res = es.search(index=st.secrets["jobIndex"], query=query, source=["id"], knn = knn,size=st.session_state.n )
-            hits += res["hits"]["hits"]
- 
+        hits = [hit for response in msearch_response['responses'] for hit in response["hits"]["hits"]]
+
         score_df = compute_scores(hits,n)
-        return outputFormat(score_df)
+        return score_df.loc[:,["_id","_score","exp"]]
     else:
         st.error("Pas de vecteur pour ce profil sur ElasticSearch")
         return("[]")

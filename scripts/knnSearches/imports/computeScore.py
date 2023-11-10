@@ -3,35 +3,12 @@ import streamlit as st
 memory = st.session_state
 
 def compute_scores(l:list,n:int)->pd.DataFrame:
+
     SC = getParameters()
     df = pd.DataFrame(l)
-    
-    processed_groups = []
-
-    # Step 1: Group by '_id'
-    grouped = df.groupby('_id')
-
-    # Step 2: Process each group
-    for name, group in grouped:
-        group = group
-        for i in range(1, 4):
-            if i < group.shape[0] + 1:
-                group[f'_score{i}'] = max(1,computeScaling(group['_score'].shift(-i + 1)*50,SC).iloc[0])
-            else: 
-                group[f'_score{i}'] = 1
-        group = group.head(1)  # Keep only the first row
-        processed_groups.append(group)
-
-    # Step 3: Concatenate all processed groups
-    final_df = pd.concat(processed_groups).reset_index(drop=True)
-
-    # Drop the original '_score' column if needed
-    final_df.drop(columns=['_score'], inplace=True)
-    final_df.fillna(1,inplace=True)
-    
-    final_df.loc[:,'_score']  = final_df[["_score1","_score2","_score3"]].max(axis=1) 
-
-    return final_df.sort_values('_score',ascending=False)[:n]
+    df.loc[:,"_score"] = (50*df["_score"]).apply(lambda x: computeScaling(x,SC))
+    df.loc[:,"exp"] = pd.Series([i//n for i in range(len(df))])
+    return df.sort_values('_score',ascending=False)
 
 
 def getParameters():

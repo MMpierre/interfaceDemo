@@ -28,6 +28,7 @@ def fetch_all_missions(es):
         scroll_size = len(res['hits']['hits'])
     return all_missions
 
+
 def fetch_mission_by_id(mission_id:list):
     
     url = st.secrets["graphQL"]
