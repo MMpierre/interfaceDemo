@@ -3,7 +3,7 @@ from streamlit_extras.colored_header import colored_header
 memory = st.session_state
 
 def displayOffer(data,score):
-    if memory.showScores and type(score)==int:
+    if memory.showScores and type(score)==float:
         st.header(f"{(score//0.1)/10}" + "% - " + data["title"][0]["value"],divider="green")
     else:
         st.header(data['title'][0]["value"],divider="green")
