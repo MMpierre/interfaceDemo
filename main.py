@@ -25,7 +25,7 @@ def main():
         if r.button("Mission > Profil",use_container_width=True) : memory.page = "Interface Mission > Profil"
         with st.sidebar.expander("Paramètres",expanded=False),st.form("settings"):
             st.header("Paramètre admin",divider="red")
-            st.slider("Scaling",0,10,6,1,key="SC")
+            st.slider("Scaling",0,10,8,1,key="SC")
             st.checkbox("Afficher les pourcentages",value=True,key="showScores")
             st.number_input('Nombre de résultats à afficher',1,25,10,1,key="n")
             st.form_submit_button("Appliquer",use_container_width=True)
