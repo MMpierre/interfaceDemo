@@ -104,7 +104,7 @@ def displayProfile(profil,data):
 
     with card:
         # scoreCard(score,i)
-        st.metric("Score",f"{(score // 0.1)/10} %",label_visibility='collapsed')
+        st.metric("Score",f"{max(0,(score // 0.1)/10)} %",label_visibility='collapsed')
         if data["id"] in memory.data["userLiked"]:
             st.success("Mission Likée")
 
