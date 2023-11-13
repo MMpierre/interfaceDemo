@@ -15,17 +15,19 @@ memory = st.session_state
 def load_profiles():
     return fetch_profiles(memory.es)
         
-def getAllData(job_offerings):
+def parseAndFetch(job_offerings):
     alldatas = []
     allscores = []
-    # TOP 3
+
     with st.spinner(f"Chargement des Mission Proposées"):
         datas = fetch_mission_by_id([id for i,id in job_offerings["_id"].items()])
-
+   
+    # TOP 3
     alldatas.append(datas[:3])
     allscores.append(job_offerings.loc[:3,"_score"][:3])
+    
     # Mission Specific
-    for i in range(len(memory.profil["experience"])):
+    for i in range(max(job_offerings["exp"])):
         alldatas.append([data for data,flag in zip(datas,job_offerings["exp"]==i) if flag])
         allscores.append(job_offerings.loc[job_offerings["exp"]==i,"_score"])
 
@@ -48,8 +50,9 @@ def getAllData(job_offerings):
 
 def displayOffers(job_offerings):
 
-    alldatas,allscores = getAllData(job_offerings)
-    tabs = st.tabs(["Missions proposées"] + [f"Missions proche de {experience['title'][0]['value']}" for experience in memory.profil["experience"]] + [f'Missions à {memory.profil["personalData"][0]["location"][0]["city"][0]["value"]}'] + [f"Missions Likées ({len(memory.profil['favoriteMissions'])})"])
+    alldatas,allscores = parseAndFetch(job_offerings)
+    
+    tabs = st.tabs(["Missions proposées"] + [f"Missions proche de {experience['title'][0]['value']}" for experience in memory.profil["experience"] if len(experience["title"])>0] + [f'Missions à {memory.profil["personalData"][0]["location"][0]["city"][0]["value"]}'] + [f"Missions Likées ({len(memory.profil['favoriteMissions'])})"])
 
 
     for tab,datas,scores in zip(tabs,alldatas,allscores):
@@ -64,6 +67,7 @@ def P2J():
     
     memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)  # 5 minute timeout
     memory.profiles = load_profiles()
+    
     _,middle,_ = st.columns(3)
     middle.header("Choisissez un profil",divider="red")
     middle.selectbox("Profil",memory.profiles,label_visibility="collapsed",format_func=lambda x: displayName(x) ,key="profil_id")
@@ -73,9 +77,9 @@ def P2J():
 
 
     if len(memory.profil["personalData"][0]["location"])>0 and len(memory.profil["personalData"][0]["location"][0]["geolocation"])>0:
-        job_offerings = P2Jsearch("mirrored/"  + memory.profil["id"],memory.n,len(memory.profil["experience"]),geo=memory.profil["personalData"][0]["location"][0]["geolocation"][0]["value"].split(","),distance=memory.profil["personalData"][0]["preferredDistance"][0]["value"])
+        job_offerings = P2Jsearch("mirrored/"  + memory.profil["id"],memory.n,min(3,len(memory.profil["experience"])),geo=memory.profil["personalData"][0]["location"][0]["geolocation"][0]["value"].split(","),distance=memory.profil["personalData"][0]["preferredDistance"][0]["value"])
     else:
-        job_offerings = P2Jsearch("mirrored/"  + memory.profil["id"],memory.n,len(memory.profil["experience"]),None,None)
+        job_offerings = P2Jsearch("mirrored/"  + memory.profil["id"],memory.n,min(3,len(memory.profil["experience"])),None,None)
     
     displayOffers(job_offerings) 
 
