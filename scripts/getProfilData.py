@@ -28,7 +28,7 @@ def fetch_all_ids(es):
             }
         }
     
-    res = es.search(index=st.secrets["profilIndex"],size=100,source=["_id"], query=query,scroll='1m',)
+    res = es.search(index=st.secrets["profilIndex"],size=1000,source=["_id"], query=query,scroll='1m',)
     scroll_id = res['_scroll_id']
     scroll_size = len(res['hits']['hits'])  
     all_ids = [profile["_id"][9:] for profile in res["hits"]["hits"]]
@@ -46,8 +46,8 @@ def fetch_all_ids(es):
 def fetch_reduced_data_by_ids(user_ids: list) -> list:
     url = st.secrets["graphQL"]
     detailed_query = """
-    query Users($userIds: [ID]) {
-        User(id: $userIds) {
+    query User($userId: [ID], $pagination: paginationInput) {
+                            User(id: $userId, pagination: $pagination) {
             id
             personalData {
                 family { value }
@@ -56,7 +56,10 @@ def fetch_reduced_data_by_ids(user_ids: list) -> list:
         }
     }"""
 
-    variables = {"userIds": user_ids}
+    variables = {"userId": user_ids,
+                "pagination": { 
+                    "limit": len(user_ids)
+                                }}
     try:
         response = requests.post(url, json={"query": detailed_query, "variables": variables},timeout=60)
     except requests.Timeout:
@@ -71,8 +74,8 @@ def fetch_reduced_data_by_ids(user_ids: list) -> list:
 
 def fetch_data_by_id(user_id:str):
     url = st.secrets["graphQL"]
-    detailed_query = """query User($userId: [ID]) {
-                            User(id: $userId) {
+    detailed_query = """query User($userId: [ID], $pagination: paginationInput) {
+                            User(id: $userId, pagination: $pagination) {
                                id
                                personalData {
                                    email { value }
@@ -103,13 +106,17 @@ def fetch_data_by_id(user_id:str):
                            }
                        }"""
 
-    variables = {"userId": user_id}
+    variables = {"userId": user_id,
+                "pagination": { 
+                    "limit": len(user_id)
+                                }}
     
     response = requests.post(url, json={"query": detailed_query, "variables": variables})
 
     if response.status_code == 200:
-        data = response.json()
-        return data["data"]["User"]
+        data = response.json()["data"]["User"]
+        ordered_data = sorted(data, key=lambda x: user_id.index(x["id"]))
+        return ordered_data
     else:
         print(f"Query failed with status code {response.text}")
 
