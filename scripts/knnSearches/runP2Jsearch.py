@@ -41,9 +41,9 @@ def P2Jsearch(id:str, n:int, expected:int, geo:tuple, distance:int) -> pd.DataFr
             msearch_response = es.msearch(body=msearch_request_body)
 
         hits = [hit for response in msearch_response['responses'] for hit in response["hits"]["hits"]]
-
+     
         score_df = compute_scores(hits,n)
-        return score_df.loc[:,["_id","_score","exp"]]
+        return score_df.loc[:,["_id","_score","exp","city"]]
     else:
         st.error("Pas de vecteur pour ce profil sur ElasticSearch")
         return None

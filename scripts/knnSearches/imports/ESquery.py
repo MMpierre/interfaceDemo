@@ -38,7 +38,7 @@ def construct_basic_search_request(vec, index, n):
     header = {"index": index}
     body = {
         "query": {"match_all": {}},
-        "_source": ["id"],
+        "_source": ["id","address__city__0"],
         "size": n,
         "knn": {
             "field": "vector",

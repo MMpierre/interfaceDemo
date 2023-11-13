@@ -32,8 +32,8 @@ def fetch_all_missions(es):
 def fetch_mission_by_id(mission_id:list):
     
     url = st.secrets["graphQL"]
-    detailed_query = """query User($missionsPromanId: [ID]) {
-                            missionsProman(id: $missionsPromanId) {
+    detailed_query = """query User($missionsPromanId: [ID], $pagination: paginationInput) {
+                            missionsProman(id: $missionsPromanId, pagination: $pagination) {
                                 Mission {
                                 id
                                 agency {
@@ -87,7 +87,10 @@ def fetch_mission_by_id(mission_id:list):
                             }
                             }"""
 
-    variables = {"missionsPromanId": mission_id}
+    variables = {"missionsPromanId": mission_id,  
+                 "pagination": { 
+                    "limit": len(mission_id)
+                                }}
     
     response = requests.post(url, json={"query": detailed_query, "variables": variables})
 

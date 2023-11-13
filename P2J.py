@@ -18,26 +18,29 @@ def load_profiles():
 def getAllData(job_offerings):
     alldatas = []
     allscores = []
-    total = 1 + len(memory.profil['experience']) +  int(len(memory.profil["favoriteMissions"] )>0)
     # TOP 3
-    with st.spinner(f"(1/{total}) - Chargement des Mission Proposées"):
-        datas = fetch_mission_by_id([id for i,id in job_offerings.loc[:3,"_id"].items()])
+    with st.spinner(f"Chargement des Mission Proposées"):
+        datas = fetch_mission_by_id([id for i,id in job_offerings["_id"].items()])
+
     alldatas.append(datas[:3])
     allscores.append(job_offerings.loc[:3,"_score"][:3])
     # Mission Specific
     for i in range(len(memory.profil["experience"])):
-        with st.spinner(f"({i+2}/{total}) - Récupération des missions pour {memory.profil['experience'][i]['title'][0]['value']}"):
-            datas = fetch_mission_by_id([id for i,id in job_offerings.loc[job_offerings["exp"]==i,"_id"].items()])
-        alldatas.append(datas)
-
+        alldatas.append([data for data,flag in zip(datas,job_offerings["exp"]==i) if flag])
         allscores.append(job_offerings.loc[job_offerings["exp"]==i,"_score"])
+
+    city = memory.profil["personalData"][0]["location"][0]["city"][0]["value"]
+
+    if city in set(job_offerings["city"].str.capitalize()):
+        alldatas.append([data for data,flag in zip(datas,job_offerings["city"].str.capitalize()==city) if flag])
+        allscores.append(job_offerings.loc[job_offerings["city"].str.capitalize()==city,"_score"])
 
     # Liked Missions
     if len(memory.profil["favoriteMissions"])==0:
         alldatas.append([])
         allscores.append([])
     else:
-        with st.spinner(f"({2+len(memory.profil['experience'])}/{total}) - Chargement des Mission Likées"):
+        with st.spinner(f"Chargement des Mission Likées"):
             datas = fetch_mission_by_id([mission["id"] for mission in memory.profil["favoriteMissions"]])      
         alldatas.append(datas)
         allscores.append(len(memory.profil["favoriteMissions"]) * ["❤"])
@@ -46,7 +49,7 @@ def getAllData(job_offerings):
 def displayOffers(job_offerings):
 
     alldatas,allscores = getAllData(job_offerings)
-    tabs = st.tabs(["Missions proposées"] + [f"Missions proche de {experience['title'][0]['value']}" for experience in memory.profil["experience"]] + [f"Missions Likées ({len(memory.profil['favoriteMissions'])})"])
+    tabs = st.tabs(["Missions proposées"] + [f"Missions proche de {experience['title'][0]['value']}" for experience in memory.profil["experience"]] + [f'Missions à {memory.profil["personalData"][0]["location"][0]["city"][0]["value"]}'] + [f"Missions Likées ({len(memory.profil['favoriteMissions'])})"])
 
 
     for tab,datas,scores in zip(tabs,alldatas,allscores):

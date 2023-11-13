@@ -8,6 +8,7 @@ def compute_scores(l:list,n:int)->pd.DataFrame:
     df = pd.DataFrame(l)
     df.loc[:,"_score"] = (50*df["_score"]).apply(lambda x: computeScaling(x,SC))
     df.loc[:,"exp"] = pd.Series([i//n for i in range(len(df))])
+    df.loc[:,"city"] = df.loc[:,"_source"].apply(lambda x: x["address__city__0"])
     return df.sort_values('_score',ascending=False)
 
 
