@@ -35,6 +35,7 @@ def fetch_mission_by_id(mission_id:list):
     detailed_query = """query User($missionsPromanId: [ID]) {
                             missionsProman(id: $missionsPromanId) {
                                 Mission {
+                                id
                                 agency {
                                     prefLabel {
                                     value
@@ -91,8 +92,11 @@ def fetch_mission_by_id(mission_id:list):
     response = requests.post(url, json={"query": detailed_query, "variables": variables})
 
     if response.status_code == 200:
-        data = response.json()
-        return data["data"]["missionsProman"]["Mission"]
+        data = response.json()["data"]["missionsProman"]["Mission"]
+
+        ordered_data = sorted(data, key=lambda x: mission_id.index(x["id"]))
+
+        return ordered_data
     else:
         print(f"Query failed with status code {response.text}")
 

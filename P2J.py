@@ -24,12 +24,12 @@ def getAllData(job_offerings):
         datas = fetch_mission_by_id([id for i,id in job_offerings.loc[:3,"_id"].items()])
     alldatas.append(datas[:3])
     allscores.append(job_offerings.loc[:3,"_score"][:3])
-    
     # Mission Specific
     for i in range(len(memory.profil["experience"])):
         with st.spinner(f"({i+2}/{total}) - Récupération des missions pour {memory.profil['experience'][i]['title'][0]['value']}"):
             datas = fetch_mission_by_id([id for i,id in job_offerings.loc[job_offerings["exp"]==i,"_id"].items()])
         alldatas.append(datas)
+
         allscores.append(job_offerings.loc[job_offerings["exp"]==i,"_score"])
 
     # Liked Missions
