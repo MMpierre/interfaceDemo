@@ -23,7 +23,7 @@ def parseAndFetch(profiles):
             datas = fetch_data_by_id([id[9:] for i,id in profiles["_id"].items()])
 
     alldatas.append(datas[:10])
-    allscores.append(profiles.loc[:3,"_score"][:10])
+    allscores.append(profiles.loc[:10,"_score"][:10])
 
     # city = memory.data['missionAddress'][0]['city'][0]['value']
     # if city in set(profiles["city"].str.capitalize()):
