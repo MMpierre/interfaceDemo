@@ -41,7 +41,7 @@ def parseAndFetch(profiles):
         with st.spinner(f"Chargement des Mission Likées"):
             datas = fetch_data_by_id([mission["id"] for mission in memory.data["userLiked"]])      
         alldatas.append(datas)
-        allscores.append(len(memory.profil["favoriteMissions"]) * ["❤"])
+        allscores.append(len(memory.data["userLiked"]) * ["❤"])
     return alldatas,allscores
 
 def displayUsers(profiles):
