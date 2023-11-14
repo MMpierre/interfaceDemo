@@ -11,7 +11,11 @@ def compute_scores(l:list,n:int)->pd.DataFrame:
     try:
         df.loc[:,"city"] = df.loc[:,"_source"].apply(lambda x: x["address__city__0"])
     except:
-        pass
+        try:
+            df.loc[:,"city"] = df.loc[:,"_source"].apply(lambda x: x["location__city__0"])
+        except:
+            df.loc[:,"city"] = ["Na"]*len(df)
+
     return df.sort_values('_score',ascending=False)
 
 

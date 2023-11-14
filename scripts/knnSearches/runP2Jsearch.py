@@ -20,17 +20,15 @@ def P2Jsearch(id:str, n:int, expected:int, geo:tuple, distance:int) -> pd.DataFr
         requests = []
         if geo:
             with st.spinner("Récupération des missions dans la région ..."):
-                geo_ids = get_geo_matching_ids(es,st.secrets["jobIndex"],geo,distance)
-        if len(geo_ids)==0:
-            st.warning("Pas d'offres dans votre région")
+                geo_ids = get_geo_matching_missions(es,st.secrets["jobIndex"],geo,distance)
+            if len(geo_ids)==0:
+                st.warning("Pas d'offres dans votre région")
 
         for vec in vecs:
+            header, body = construct_mission_search_request(vec,st.secrets["jobIndex"],n)
             if geo and len(geo_ids)>0:
-                header, body = construct_basic_search_request(vec,st.secrets["jobIndex"],n)
                 body["knn"]["filter"] =  {"bool": {"must": [ {"ids": {"values": geo_ids}}]}}
                 body["size"] = min(len(geo_ids),n)
-            else:
-                header,body = construct_basic_search_request(vec,st.secrets["jobIndex"],n)
             requests.append(json.dumps(header))
             requests.append(json.dumps(body))
         
@@ -59,7 +57,7 @@ def P2Jsearch_Liked(id:str,n:int,expected:int,likedIds:list)->pd.DataFrame:
 
         requests = []
         for vec in vecs:
-            header,body = construct_basic_search_request(vec,st.secrets["jobIndex"],n)
+            header,body = construct_mission_search_request(vec,st.secrets["jobIndex"],n)
             body["query"] = {"bool": {"must": [ {"ids": {"values": likedIds}}]}}
             requests.append(json.dumps(header))
             requests.append(json.dumps(body))

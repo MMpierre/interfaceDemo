@@ -3,9 +3,10 @@ from streamlit_extras.colored_header import colored_header
 import ast
 import matplotlib.pyplot as plt
 import elasticsearch
-from scripts.knnSearches.runJ2Psearch import J2Psearch,J2Psearch_liked
+from scripts.knnSearches.runJ2Psearch import J2Psearch
 from scripts.getProfilData import fetch_data_by_id
 from scripts.getMissionData import fetch_mission_by_id,fetch_all_missions
+from scripts.componentsUI import *
 from time import time
 memory = st.session_state
 ######################################### AFFICHAGE ##############################################################
@@ -14,129 +15,65 @@ memory = st.session_state
 def load_missions():
     return [x for x in fetch_all_missions(memory.es)]
 
+def parseAndFetch(profiles):
+    alldatas = []
+    allscores = []
 
-css = '''
-<style>
-    .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
-    font-size:2rem;
-    }
-</style>
-'''
+    with st.spinner(f"Chargement des Profils Proposées"):
+            datas = fetch_data_by_id([id[9:] for i,id in profiles["_id"].items()])
 
-st.markdown(css, unsafe_allow_html=True)
+    alldatas.append(datas[:10])
+    allscores.append(profiles.loc[:3,"_score"][:10])
 
-    
-######################################### AFFICHAGE ##############################################################
-def displayTitle(mission):
-    try : 
-        return mission["title__value"] + " - " + mission["address__city__0"].capitalize()
-    except:
-        return mission["title__value"] 
-       
-def displayMission():
-    st.header("Choisissez une mission",divider="red")
-    st.selectbox("Missions",memory.missions,0,label_visibility="collapsed",format_func=lambda x: displayTitle(x),key="mission")
-    memory.data = fetch_mission_by_id(memory.mission["id"])[0]
-    with st.expander("Description"):
-        st.markdown(memory.data["description"][0]["value"],unsafe_allow_html=True)
-    st.title(f'Profils Personnalisés pour {memory.mission["title__value"]}')
- 
-    with st.sidebar:
-        colored_header(
-                label="Mission",
-                description="",
-                color_name="red-80",)
-        
-        try:
-            st.info(memory.data["agency"][0]["prefLabel"][0]["value"])
-        except:
-            st.info("Pas de numéro d'agence")
-        try:
-            st.info(memory.data["missionAddress"][0]["city"][0]["value"].capitalize() + ", " + memory.data["missionAddress"][0]["postalcode"][0]["value"])
-        except:
-            st.info("Pas d'adresse")
-        try:
-            st.info("Durée : " + memory.data["contract"][0]["contractLengthValue"][0]["value"]+ " " + memory.data["contract"][0]["contractLengthUnit"][0]["value"])
-        except:
-            st.info("Pas de durée de contrat")
-        try:
-            st.info("Contrat : " + memory.data["contract"][0]["workTime"][0]["value"])
-        except:
-            st.info("Pas de type de contrat")
-        try:
-            st.link_button("URL",memory.data["url"][0]["value"],use_container_width=True)
-        except:
-            st.info("Pas de lien vers l'offre")
-        
-    
+    # city = memory.data['missionAddress'][0]['city'][0]['value']
+    # if city in set(profiles["city"].str.capitalize()):
+    #     alldatas.append([data for data,flag in zip(datas,profiles["city"].str.capitalize()==city) if flag])
+    #     allscores.append(profiles.loc[profiles["city"].str.capitalize()==city,"_score"])
+    # else:
+    #     alldatas.append([])
+    #     allscores.append([])
 
-# MATCHING ##############################################################
-
-def displayName(user):
-    try:
-        return user["personalData"][0]["given"][0]["value"].capitalize() + " " + user["personalData"][0]["family"][0]["value"].capitalize() 
-    except:
-        return user["id"]
-
-def displayProfile(profil,data):
-
-    score = profil["score"]
-    if score > 80:
-        colored_header(displayName(data),"","green-50")
-    elif score > 70:
-        colored_header(displayName(data),"","orange-50")
+    # Liked Missions
+    if len(memory.data["userLiked"])==0:
+        alldatas.append([])
+        allscores.append([])
     else:
-        colored_header(displayName(data),"","red-50")
+        with st.spinner(f"Chargement des Mission Likées"):
+            datas = fetch_data_by_id([mission["id"] for mission in memory.data["userLiked"]])      
+        alldatas.append(datas)
+        allscores.append(len(memory.profil["favoriteMissions"]) * ["❤"])
+    return alldatas,allscores
 
-    profil,card = st.columns([7,1])
+def displayUsers(profiles):
+
+    alldatas,allscores = parseAndFetch(profiles)
+    tabs = st.tabs(["Profils proposés"] + [f"Users ayant liké ({len(memory.data['userLiked'])})"])
     
-    with profil:  
-        jobs = st.columns(len(data["experience"]))
-        for i,job in enumerate(jobs):
-            with job:
-                try:
-                    st.info(data["experience"][i]["title"][0]["value"])
-                    st.info(data["experience"][i]["duration"][0]["value"])
-                except:
-                    st.warning("Pas d'informations")
-
-        
-
-    with card:
-        # scoreCard(score,i)
-        st.metric("Score",f"{max(0,(score // 0.1)/10)} %",label_visibility='collapsed')
-        if data["id"] in memory.data["userLiked"]:
-            st.success("Mission Likée")
-
-def displayProfiles(profiles):
-    with st.spinner("Récupération des profils"): 
-        datas = fetch_data_by_id([profil["id"][9:] for profil in profiles])
-    for i,(profil,data) in enumerate(zip(profiles,datas)):
-        with st.container():
-            displayProfile(profil,data)
+    
+    for tab,datas,scores in zip(tabs,alldatas,allscores):
+        with tab:
+            [displayUser(data,score)for data,score in zip(datas,scores)]
 
 
 
 def J2P():
-        #shorten session state method
-    memory = st.session_state
+    
     memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)  # 5 minute timeout
-
     memory.missions = load_missions()
-    displayMission()
-    tabs = st.tabs(["Users proposés",f"Users ayant liké ({len(memory.data['userLiked'])})"])
-    with tabs[0]:
-        with st.spinner("Calcul des scores ..."):
-            profiles = ast.literal_eval(J2Psearch(memory.mission["id"],memory.n)) 
-        displayProfiles(profiles) 
-    with tabs[1]:
-        if len(memory.data["userLiked"])==0:
-            st.warning("Aucun utilisateur n'a liké cette mission")
-        else:
-            with st.spinner("Calcul des scores ..."):
-                profiles = ast.literal_eval(J2Psearch_liked(memory.mission["id"],min(len(memory.data["userLiked"]),memory.n),["mirrored/" + user["id"] for user in memory.data["userLiked"]])) 
-            displayProfiles(profiles) 
 
+    _,middle,_ = st.columns(3)
+    middle.header("Choisissez une mission",divider="red")
+    middle.selectbox("Missions",memory.missions,0,label_visibility="collapsed",format_func=lambda x: displayTitle(x),key="mission")
+    with st.spinner("Récupération des informations de la mission"):
+        memory.data = fetch_mission_by_id(memory.mission["id"])[0]
+    displayMission(memory.data)
+        
+    if len(memory.data["missionAddress"])>0 and len(memory.data["missionAddress"][0]["geolocation"])>0:
+        profiles = J2Psearch(memory.mission["id"],memory.n,memory.data["missionAddress"][0]["geolocation"][0]["value"].split(","))
+    else:
+        profiles = J2Psearch(memory.mission["id"],memory.n,None)
+
+    displayUsers(profiles) 
 
 
         

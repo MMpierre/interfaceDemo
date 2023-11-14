@@ -74,6 +74,66 @@ def displayProfile(profil):
             st.warning("Pas d'expérience")
 
 
+def displayMission(mission):
+    with st.expander("Description"):
+        st.markdown(mission["description"][0]["value"],unsafe_allow_html=True)
+    st.title(f'Profils Personnalisés pour {memory.mission["title__value"]}')
+ 
+    with st.sidebar:
+        colored_header(
+                label="Mission",
+                description="",
+                color_name="red-80",)
+        
+        try:
+            st.info(mission["agency"][0]["prefLabel"][0]["value"])
+        except:
+            st.info("Pas de numéro d'agence")
+        try:
+            st.info(mission["missionAddress"][0]["city"][0]["value"].capitalize() + ", " + mission["missionAddress"][0]["postalcode"][0]["value"])
+        except:
+            st.info("Pas d'adresse")
+        try:
+            st.info("Durée : " + mission["contract"][0]["contractLengthValue"][0]["value"]+ " " + mission["contract"][0]["contractLengthUnit"][0]["value"])
+        except:
+            st.info("Pas de durée de contrat")
+        try:
+            st.info("Contrat : " + mission["contract"][0]["workTime"][0]["value"])
+        except:
+            st.info("Pas de type de contrat")
+        try:
+            st.link_button("URL",mission["url"][0]["value"],use_container_width=True)
+        except:
+            st.info("Pas de lien vers l'offre")
+
+
+def displayUser(data,score):
+    
+    if memory.showScores and type(score)==float:
+        st.header(f"{(score//0.1)/10}" + "% - " + displayName(data),divider="green")
+    else:
+        st.header(displayName(data),divider="green")
+    exp,info = st.columns([4,1])
+    jobs = exp.columns(len(data["experience"]))
+    for i,job in enumerate(jobs):
+        with job:
+            try:
+                st.info(data["experience"][i]["title"][0]["value"])
+                st.info(data["experience"][i]["duration"][0]["value"])
+            except:
+                st.warning("Pas d'informations")
+    with info:
+        try:
+            st.success(data["personalData"][0]["email"][0]["value"])
+        except:
+            st.success("Pas d'adresse mail")
+        try:
+            st.success(data["personalData"][0]["location"][0]["city"][0]["value"])
+        except:
+            st.success("Pas d'adresse")
+        
+
+            
 def displayName(user):
     try:
         return user["personalData"][0]["given"][0]["value"].capitalize() + " " + user["personalData"][0]["family"][0]["value"].capitalize() 
@@ -85,3 +145,9 @@ def format_address(user):
         return user["address"][0]["city"][0]["value"] + ", " + user["address"][0]["postalcode"][0]["value"]
     except:
         return "Address not specified"
+
+def displayTitle(mission):
+    try : 
+        return mission["title__value"] + " - " + mission["address__city__0"].capitalize()
+    except:
+        return mission["title__value"] 

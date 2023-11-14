@@ -1,6 +1,7 @@
 import argparse
 import elasticsearch
 import pandas as pd
+from .imports.ESquery import get_geo_matching_users,construct_profile_search_request
 from .imports.getMissionVector import getMissionVector
 from .imports.computeScore import compute_scores
 from .imports.outputFormat import outputFormat
@@ -11,86 +12,39 @@ import time
 # Output - ID des profils + scores
 
 
-def J2Psearch(id:str,n:int)->pd.DataFrame:
-    
-    res = []
-    query = {"match_all": {}}
+def J2Psearch(id:str,n:int,geo)->pd.DataFrame:
 
     es =  elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)       
     vec = getMissionVector(id,es,st.secrets["jobIndex"])
-    
-    # filter = {"bool": {
-    #                 "must": [
-    #                     {"geo_distance": { "distance": DISTANCEMAX+"km",
-    #                                  "location": {
-    #                                         "lon": LONGITUDE,
-    #                                         "lat": LATTITUDE }    }},  
-    #                     {"range": { "experienceMinimum": {
-    #                                  "lt": EXPERIENCE } }},
-    #                     {"range": { "educationLevel": {
-    #                                   "lte" : EDUCATION}} }]} }
+    st.write(geo)
+    if geo:
+        with st.spinner("Récupération des Users dans la région ..."):
+            geo_ids = get_geo_matching_users(es,st.secrets["profilIndex"],geo)
+            st.warning("La recherche par location dans ce sens peut présenter des erreurs.")
+        if len(geo_ids)==0:
+            st.warning("Pas d'users dans votre région")
+    st.write(geo_ids)
     requests = []
     for i in range(0, 3):
-        header = {"index": st.secrets["profilIndex"]}
-        body = {
-            "query": query,
-            "_source": ["id"],  # Assuming you only need the 'id' field
-            "size": n,  # Ensure you only retrieve 'n' results
-            "knn": {
-                "field": f"experience__occupation__vector__{i}",
-                "query_vector": vec,
-                "k": n,
-                "num_candidates": n
-            }
-        }
+        header,body = construct_profile_search_request(vec,f"experience__occupation__vector__{i}",st.secrets["profilIndex"],n)
+        if geo and len(geo_ids)>0:
+                body["knn"]["filter"] =  {"bool": {"must": [ {"ids": {"values": geo_ids}}]}}
+                body["size"] = min(len(geo_ids),n)            
         requests.append(json.dumps(header))  # Header is added as a JSON string
         requests.append(json.dumps(body))  # Body is added as a JSON string
 
     # Join the requests with newline characters and add a final newline character at the end
-    msearch_request_body = '\n'.join(requests) + '\n'
+    with st.spinner("Calcul des meilleurs profils ..."):
+        msearch_request_body = '\n'.join(requests) + '\n'
 
     # Perform the multi-search request
-    res = es.msearch(body=msearch_request_body)
+    msearch_response = es.msearch(body=msearch_request_body)
 
-    # Parse the results
-    # The response will contain a 'responses' array with individual search results
-    all_hits = []
-    for response in res['responses']:
-        all_hits += response['hits']['hits']
-    scores = compute_scores(all_hits,n)
-    return outputFormat(scores)
+    hits = [hit for response in msearch_response['responses'] for hit in response["hits"]["hits"]]
 
+    scores = compute_scores(hits,n)
+    return scores.loc[:,["_id","_score","city"]]
 
-def J2Psearch_liked(id:str,n:int,likedIds:list)->pd.DataFrame:
-    
-    res = []
-    query = {"bool": {"must": [ {"ids": {"values": likedIds}}]}}
-
-    es =  elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)       
-    vec = getMissionVector(id,es,st.secrets["jobIndex"])
-    
-    # filter = {"bool": {
-    #                 "must": [
-    #                     {"geo_distance": { "distance": DISTANCEMAX+"km",
-    #                                  "location": {
-    #                                         "lon": LONGITUDE,
-    #                                         "lat": LATTITUDE }    }},  
-    #                     {"range": { "experienceMinimum": {
-    #                                  "lt": EXPERIENCE } }},
-    #                     {"range": { "educationLevel": {
-    #                                   "lte" : EDUCATION}} }]} }
-
-    for i in range (0,3):
-
-        knn = {"field": f"experience__occupation__vector__{i}",
-                "query_vector": vec,
-                "k": n,
-                "num_candidates": n}
-        
-        res += es.search(index=st.secrets["profilIndex"], query=query, source=["id"], knn = knn)["hits"]["hits"]
-
-    scores = compute_scores(res,n)
-    return outputFormat(scores)
 
 
 
