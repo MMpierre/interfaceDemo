@@ -47,8 +47,9 @@ def parseAndFetch(profiles):
 def displayUsers(profiles):
 
     alldatas,allscores = parseAndFetch(profiles)
-    tabs = st.tabs(["Profils proposés"] + [f"Users ayant liké ({len(memory.data['userLiked'])})"])
-    
+    tabs = st.tabs(["Profils proposés"] + [f"Users ayant liké ({len(memory.data['userLiked'])})"] + ["Prochainement"])
+    with tabs[-1]:
+        st.info("D'autres onglets arrivent très rapidement")
     
     for tab,datas,scores in zip(tabs,alldatas,allscores):
         with tab:

@@ -16,14 +16,14 @@ def J2Psearch(id:str,n:int,geo)->pd.DataFrame:
 
     es =  elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)       
     vec = getMissionVector(id,es,st.secrets["jobIndex"])
-    st.write(geo)
+
     if geo:
         with st.spinner("Récupération des Users dans la région ..."):
             geo_ids = get_geo_matching_users(es,st.secrets["profilIndex"],geo)
             st.warning("La recherche par location dans ce sens peut présenter des erreurs.")
         if len(geo_ids)==0:
             st.warning("Pas d'users dans votre région")
-    st.write(geo_ids)
+
     requests = []
     for i in range(0, 3):
         header,body = construct_profile_search_request(vec,f"experience__occupation__vector__{i}",st.secrets["profilIndex"],n)
