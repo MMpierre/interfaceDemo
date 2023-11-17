@@ -16,7 +16,7 @@ def fetch_all_missions(es):
             }
         }
     
-    res = es.search(index=st.secrets["jobIndex"],size=100,source=["id","title__value","address__city__0"], query=query,scroll='1m')
+    res = es.search(index=st.secrets["jobIndex"],size=100,source=["id","title__value","address__city__0","agency__id"], query=query,scroll='1m')
     scroll_id = res['_scroll_id']
     scroll_size = len(res['hits']['hits'])
     

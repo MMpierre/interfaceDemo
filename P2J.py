@@ -18,6 +18,9 @@ def parseAndFetch(job_offerings):
     alldatas = []
     allscores = []
     tabs = []
+    for id in memory.profil["favoriteMissions"]:
+        job_offerings.loc[job_offerings["_id"] == id["id"],"_score"] += 10 
+    job_offerings = job_offerings.sort_values(by="_score",ascending=False)
     with st.spinner(f"Chargement des Mission Proposées"):
         datas = fetch_mission_by_id([id for i,id in job_offerings["_id"].items()])
    

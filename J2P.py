@@ -18,6 +18,8 @@ def load_missions():
 def parseAndFetch(profiles):
     alldatas = []
     allscores = []
+    for id in memory.data["userLiked"]:
+        profiles.loc[profiles["_id"] == "mirrored/" + id["id"],"_score"] += 10 
     
     profiles['Is_Duplicate'] = profiles.duplicated(subset='_id', keep=False)
     profiles = profiles.drop_duplicates(subset="_id")
@@ -71,9 +73,13 @@ def J2P():
     memory.es = elasticsearch.Elasticsearch(cloud_id=st.secrets["cloud_id"], api_key=(st.secrets["api_key_1"],st.secrets["api_key_2"]),request_timeout=300)  # 5 minute timeout
     memory.missions = load_missions()
 
-    _,middle,_ = st.columns(3)
+    _,middle,_ = st.columns([1,2,1])
     middle.header("Choisissez une mission",divider="red")
-    middle.selectbox("Missions",memory.missions,0,label_visibility="collapsed",format_func=lambda x: displayTitle(x),key="mission")
+    l,r = middle.columns([1,2])
+    agencies = sorted(set([mission["agency__id"][7:] for mission in memory.missions]))
+    agency = l.selectbox("Agence",agencies,0,label_visibility="collapsed")
+    missions = [mission for mission in memory.missions if mission["agency__id"][7:]==agency]
+    r.selectbox("Missions",missions,0,label_visibility="collapsed",format_func=lambda x: displayTitle(x),key="mission")
     with st.spinner("Récupération des informations de la mission"):
         memory.data = fetch_mission_by_id(memory.mission["id"])[0]
     displayMission(memory.data)
