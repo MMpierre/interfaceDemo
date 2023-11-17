@@ -76,9 +76,12 @@ def J2P():
     _,middle,_ = st.columns([1,2,1])
     middle.header("Choisissez une mission",divider="red")
     l,r = middle.columns([1,2])
-    agencies = sorted(set([mission["agency__id"][7:] for mission in memory.missions]))
-    agency = l.selectbox("Agence",agencies,0,label_visibility="collapsed")
-    missions = [mission for mission in memory.missions if mission["agency__id"][7:]==agency]
+    agencies = sorted(set([mission["agency__id"][7:] for mission in memory.missions if "agency__id" in mission]))
+    agency = l.selectbox("Agence",["Toutes Agences"] + agencies,0,label_visibility="collapsed")
+    if agency == "Toutes Agences":
+        missions = memory.missions
+    else:
+        missions = [mission for mission in memory.missions if "agency__id" in mission and mission["agency__id"][7:]==agency]
     r.selectbox("Missions",missions,0,label_visibility="collapsed",format_func=lambda x: displayTitle(x),key="mission")
     with st.spinner("Récupération des informations de la mission"):
         memory.data = fetch_mission_by_id(memory.mission["id"])[0]
