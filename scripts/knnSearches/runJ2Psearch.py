@@ -21,6 +21,7 @@ def J2Psearch(id:str,n:int,geo)->pd.DataFrame:
         with st.spinner("Récupération des Users dans la région ..."):
             geo_ids = get_geo_matching_users(es,st.secrets["profilIndex"],geo)
             st.warning("La recherche par location dans ce sens peut présenter des erreurs.")
+
         if len(geo_ids)==0:
             st.warning("Pas d'users dans votre région")
 
@@ -29,7 +30,8 @@ def J2Psearch(id:str,n:int,geo)->pd.DataFrame:
         header,body = construct_profile_search_request(vec,f"experience__occupation__vector__{i}",st.secrets["profilIndex"],n)
         if geo and len(geo_ids)>0:
                 body["knn"]["filter"] =  {"bool": {"must": [ {"ids": {"values": geo_ids}}]}}
-                body["size"] = min(len(geo_ids),n)            
+                body["knn"]["k"] = min(len(geo_ids),n)       
+                body["knn"]["num_candidates"] = min(len(geo_ids),n)        
         requests.append(json.dumps(header))  # Header is added as a JSON string
         requests.append(json.dumps(body))  # Body is added as a JSON string
 

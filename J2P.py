@@ -18,20 +18,29 @@ def load_missions():
 def parseAndFetch(profiles):
     alldatas = []
     allscores = []
-
+    
+    profiles['Is_Duplicate'] = profiles.duplicated(subset='_id', keep=False)
+    profiles = profiles.drop_duplicates(subset="_id")
     with st.spinner(f"Chargement des Profils Proposées"):
-            datas = fetch_data_by_id([id[9:] for i,id in profiles["_id"].items()])
+            datas = fetch_data_by_id([id.replace("mirrored/","") for i,id in profiles["_id"].items()])
 
-    alldatas.append(datas[:10])
-    allscores.append(profiles.loc[:10,"_score"][:10])
 
-    # city = memory.data['missionAddress'][0]['city'][0]['value']
-    # if city in set(profiles["city"].str.capitalize()):
-    #     alldatas.append([data for data,flag in zip(datas,profiles["city"].str.capitalize()==city) if flag])
-    #     allscores.append(profiles.loc[profiles["city"].str.capitalize()==city,"_score"])
-    # else:
-    #     alldatas.append([])
-    #     allscores.append([])
+    alldatas.append(datas)
+    allscores.append(profiles.loc[:,"_score"])
+
+    #With multiple relevant experiences
+    alldatas.append([data for data,flag in zip(datas,profiles["Is_Duplicate"]) if flag])
+    allscores.append(profiles.loc[profiles["Is_Duplicate"],"_score"])    
+
+
+    #In the same city
+    city = memory.data['missionAddress'][0]['city'][0]['value'].capitalize()
+    if city in set(profiles["city"].str.capitalize()):
+        alldatas.append([data for data,flag in zip(datas,profiles["city"].str.capitalize()==city) if flag])
+        allscores.append(profiles.loc[profiles["city"].str.capitalize()==city,"_score"])
+    else:
+        alldatas.append([])
+        allscores.append([])
 
     # Liked Missions
     if len(memory.data["userLiked"])==0:
@@ -47,10 +56,10 @@ def parseAndFetch(profiles):
 def displayUsers(profiles):
 
     alldatas,allscores = parseAndFetch(profiles)
-    tabs = st.tabs(["Profils proposés"] + [f"Users ayant liké ({len(memory.data['userLiked'])})"] + ["Prochainement"])
-    with tabs[-1]:
-        st.info("D'autres onglets arrivent très rapidement")
-    
+    tabs = st.tabs(["Profils proposés"] + [f"Users avec expériences multiples" ] + [f"Users à {memory.data['missionAddress'][0]['city'][0]['value'].capitalize()}"] +[f"Users ayant liké ({len(memory.data['userLiked'])})"])
+
+    with tabs[1]:
+        st.warning("L'intérêt de cette section est de ressortir les profils qui ont plusieurs expériences qui ont matché. Cependant avec le peu de profils sur la base actuelle, toutes les expériences rentrent dans le top10  ")
     for tab,datas,scores in zip(tabs,alldatas,allscores):
         with tab:
             [displayUser(data,score)for data,score in zip(datas,scores)]
