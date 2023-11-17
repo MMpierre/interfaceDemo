@@ -15,7 +15,6 @@ def compute_scores(l:list,n:int)->pd.DataFrame:
             df = df[~df['_id'].str.contains("location")]
             df.loc[:,"city"] = df.loc[:,"_source"].map(lambda x: x["location__city__0"])
         except:
-            st.write(df)
             df.loc[:,"city"] = ["Na"]*len(df)
 
     return df.sort_values('_score',ascending=False)
