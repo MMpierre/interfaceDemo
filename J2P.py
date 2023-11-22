@@ -18,11 +18,13 @@ def load_missions():
 def parseAndFetch(profiles):
     alldatas = []
     allscores = []
+    
     for id in memory.data["userLiked"]:
         profiles.loc[profiles["_id"] == "mirrored/" + id["id"],"_score"] += 10 
-    
+    profiles = profiles.sort_values(by="_score",ascending = False)
     profiles['Is_Duplicate'] = profiles.duplicated(subset='_id', keep=False)
     profiles = profiles.drop_duplicates(subset="_id")
+    
     with st.spinner(f"Chargement des Profils Proposées"):
             datas = fetch_data_by_id([id.replace("mirrored/","") for i,id in profiles["_id"].items()])
 

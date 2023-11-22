@@ -18,7 +18,8 @@ enableCORS = false\n\
 " > /root/.streamlit/config.toml'
 
 # Expose port
-ENV PORT 8501
+ENV PORT 8080
 
 # Run streamlit app
-CMD ["streamlit", "run", "main.py"]
+CMD ["streamlit", "run", "main.py","--server.port", "8080"]
+

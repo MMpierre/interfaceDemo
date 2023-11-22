@@ -38,22 +38,30 @@ def get_geo_matching_users(es,index,geo):
     
     # Construct the query
     query = {
-            "query": {
-                "bool": {
-                "must": {
+    "query": {
+        "bool": {
+            "must": [
+                {
                     "geo_shape": {
-                    "employment_zone": {
-                        "shape": {
-                        "type": "point",
-                        "coordinates": [float(geo[0]), float(geo[1])]
-                        },
-                        "relation": "contains"
+                        "employment_zone": {
+                            "shape": {
+                                "type": "point",
+                                "coordinates": [float(geo[1]), float(geo[0])]
+                            },
+                            "relation": "contains"
+                        }
                     }
+                },
+                {
+                    "exists": {
+                        "field": "experience__id__0"
                     }
                 }
-                }
-            }
-            }
+            ]
+        }
+    }
+}
+
 
     # Initialize scroll
     page = es.search(index=index, scroll='1m', size=1000, body=query)  # Adjust size as needed
