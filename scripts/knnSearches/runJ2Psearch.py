@@ -20,7 +20,6 @@ def J2Psearch(id:str,n:int,geo)->pd.DataFrame:
     if geo:
         with st.spinner("Récupération des Users dans la région ..."):
             geo_ids = get_geo_matching_users(es,st.secrets["profilIndex"],geo)
-            st.warning("La recherche par location dans le sens mission -> user peut présenter des erreurs.")
 
         if len(geo_ids)==0:
             st.warning("Pas d'users dans votre région")
