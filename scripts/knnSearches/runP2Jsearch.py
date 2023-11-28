@@ -7,11 +7,8 @@ from .imports.outputFormat import outputFormat
 from .imports.ESquery import *
 import streamlit as st
 import json
-import ast
-# Input - ID de la mission
-# Output - ID des profils + scores
 
-
+@st.cache_data(ttl=600,show_spinner=False)
 def P2Jsearch(id:str, n:int, expected:int, geo:tuple, distance:int) -> pd.DataFrame:
     es = getElasticClient()
     vecs = getProfilVectors(id, es, st.secrets["profilIndex"],expected)
@@ -45,8 +42,6 @@ def P2Jsearch(id:str, n:int, expected:int, geo:tuple, distance:int) -> pd.DataFr
     else:
         st.error("Pas de vecteur pour ce profil sur ElasticSearch")
         return None
-
-
   
 def P2Jsearch_Liked(id:str,n:int,expected:int,likedIds:list)->pd.DataFrame:
 

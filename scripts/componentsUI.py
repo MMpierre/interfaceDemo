@@ -1,18 +1,34 @@
 import streamlit as st
 from streamlit_extras.colored_header import colored_header
+from random import random
+
 memory = st.session_state
 
-def displayOffer(data,score):
+def displayOffer(data,score,tab,i):
     if memory.showScores and type(score)==float:
         st.header(f"{(score//0.1)/10}" + "% - " + data["title"][0]["value"],divider="green")
     else:
         st.header(data['title'][0]["value"],divider="green")
 
-    desc,url = st.columns([9,1])
+    fb,desc,url = st.columns([1,9,1])
+
+    if fb.button("Like",key=f"like-{i}-{tab}",use_container_width=True):
+        new_row = [memory.profil["id"], data["id"], "1"]  # Update this with the data you want to add
+        st.session_state.sheet.append_row(new_row)
+        st.toast("Feedback Sauvegardé !")
+
+
     with desc.expander("Description",expanded=False):
         st.markdown(data["description"][0]["value"],unsafe_allow_html=True) 
     url.link_button("URL Proman",data["url"][0]["value"])
-    ad,w,l,ag = st.columns([3,3,3,1])
+
+    fb,ad,w,l,ag = st.columns([1,3,3,3,1])
+
+    if fb.button("Dislike",key=f"dislike-{i}-{tab}",use_container_width=True):
+        new_row = [memory.profil["id"], data["id"], "0"]  # Update this with the data you want to add
+        st.session_state.sheet.append_row(new_row)
+        st.toast("Feedback Sauvegardé !")
+
     try:
         ad.info(data["missionAddress"][0]["city"][0]["value"].capitalize() + ", " + data["missionAddress"][0]["postalcode"][0]["value"])
     except:

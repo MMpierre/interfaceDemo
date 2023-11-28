@@ -2,7 +2,17 @@ import streamlit as st
 st.set_page_config(layout="wide")
 from P2J import P2J 
 from J2P import J2P
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+import pandas as pd
 memory = st.session_state
+
+def connect2sheets():
+    with st.spinner("Connexion au serveur ..."):
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["google_creds"], scope)
+        client = gspread.authorize(creds)
+        st.session_state.sheet = client.open("promanFeedback").sheet1
 
 def main():
     st.sidebar.title("Interface Administrateur")
@@ -20,6 +30,9 @@ def main():
         elif userPassword != "":
             st.warning("Mot de passe erroné")
     else:           
+        # Authenticate with Google Sheets
+        if "sheet" not in st.session_state:
+            connect2sheets()
         l,r = st.sidebar.columns(2)
         if l.button("Profil > Mission",use_container_width=True) : memory.page = "Interface Profil > Mission"
         if r.button("Mission > Profil",use_container_width=True) : memory.page = "Interface Mission > Profil"

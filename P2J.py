@@ -67,7 +67,7 @@ def displayOffers(job_offerings):
 
     for tab,datas,scores in zip(tabs,alldatas,allscores):
         with tab:
-            [displayOffer(data,score)for data,score in zip(datas,scores)]
+            [displayOffer(data,score,tab,i)for i,(data,score) in enumerate(zip(datas,scores))]
 
         
         

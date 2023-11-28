@@ -1,7 +1,4 @@
 import streamlit as st
-from streamlit_extras.colored_header import colored_header
-import ast
-import matplotlib.pyplot as plt
 import elasticsearch
 from scripts.knnSearches.runJ2Psearch import J2Psearch
 from scripts.getProfilData import fetch_data_by_id
