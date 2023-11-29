@@ -3,7 +3,6 @@ import streamlit as st
 import json
 from elasticsearch import Elasticsearch
 
-@st.cache_data(ttl=600,show_spinner=False)
 def fetch_all_missions(es):
     # Initial search
     query = {
