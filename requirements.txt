@@ -6,3 +6,5 @@ pandas
 matplotlib
 elasticsearch
 torch
+oauth2client
+gspread
