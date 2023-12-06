@@ -1,5 +1,7 @@
 def get_geo_matching_missions(es,index,geo,distance):
-    
+    if distance == "0km":
+        return []
+
     # Construct the query
     query = {
         "query": {
