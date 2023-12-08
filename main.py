@@ -24,6 +24,8 @@ def main():
         
     if memory["authorized"] == False:
         userPassword = st.text_input("Rentrez le Mot de Passe","")
+        st.info("Changement d'hébergeur - Pour des raisons de stabilité, les nouvelles features seront implémentées uniquement sur https://interfaceadmin-wyew76oo4a-ew.a.run.app")
+
         if userPassword == st.secrets["password"]:
             memory["authorized"] = True
             st.rerun()
